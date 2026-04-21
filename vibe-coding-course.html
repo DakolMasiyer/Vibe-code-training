@@ -911,6 +911,112 @@
     color: var(--muted);
   }
 
+  /* PHASE COMPLETION OVERLAY */
+  .phase-complete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(10,10,15,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .phase-complete-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .phase-complete-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.35s ease;
+    position: relative;
+  }
+  .phase-complete-overlay.show .phase-complete-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .phase-complete-glyph {
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: block;
+    animation: pulseBounce 0.6s ease 0.3s both;
+  }
+  @keyframes pulseBounce {
+    0%   { transform: scale(0.5); opacity: 0; }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .phase-complete-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 12px;
+  }
+
+  .phase-complete-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .phase-complete-msg {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .phase-complete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .phase-next-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .phase-next-btn:hover { background: #6a5af0; transform: translateY(-1px); }
+
+  .phase-dismiss-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .phase-dismiss-btn:hover { color: var(--text); }
+
   /* HAMBURGER (hidden on desktop) */
   .hamburger {
     display: none;
@@ -1020,6 +1126,20 @@
 <!-- MOBILE HAMBURGER + SIDEBAR BACKDROP -->
 <button class="hamburger" id="hamburger" onclick="toggleMobileSidebar()">☰</button>
 <div class="mobile-sb-backdrop" id="mobile-sb-backdrop" onclick="closeMobileSidebar()"></div>
+
+<!-- PHASE COMPLETE OVERLAY -->
+<div class="phase-complete-overlay" id="phase-complete-overlay">
+  <div class="phase-complete-card">
+    <span class="phase-complete-glyph" id="pc-glyph">🎉</span>
+    <div class="phase-complete-eyebrow" id="pc-eyebrow">Phase Complete</div>
+    <div class="phase-complete-title" id="pc-title">Foundation Complete</div>
+    <div class="phase-complete-msg" id="pc-msg"></div>
+    <div class="phase-complete-actions">
+      <button class="phase-next-btn" id="pc-next-btn" onclick="phaseCompleteNext()">Continue →</button>
+      <button class="phase-dismiss-btn" onclick="dismissPhaseComplete()">Stay here</button>
+    </div>
+  </div>
+</div>
 
 <!-- NOTES FAB -->
 <button class="notes-fab" id="notes-fab" onclick="openNotes()">📝 Notes</button>
@@ -3882,7 +4002,8 @@ function toggleSection(id) {
 // MARK DONE
 // ============================================================
 function markDone(id) {
-  if (completedLessons.has(id)) {
+  const wasComplete = completedLessons.has(id)
+  if (wasComplete) {
     completedLessons.delete(id)
   } else {
     completedLessons.add(id)
@@ -3893,6 +4014,63 @@ function markDone(id) {
   if (btn) {
     btn.classList.toggle('done', completedLessons.has(id))
     btn.textContent = completedLessons.has(id) ? '✓ Completed' : 'Mark Complete'
+  }
+
+  // Check for phase completion (only when marking complete, not un-marking)
+  if (!wasComplete) {
+    const phase = curriculum.find(p => p.lessons.some(l => l.id === id))
+    if (phase) {
+      const allPhaseLessonsDone = phase.lessons.every(l => completedLessons.has(l.id))
+      if (allPhaseLessonsDone) showPhaseComplete(phase)
+    }
+  }
+}
+
+// ============================================================
+// PHASE COMPLETION
+// ============================================================
+const phaseMessages = [
+  'You\'ve internalized the vibe coding mental model. The mental shift from bricklayer to architect is done. Time to build.',
+  'Your project skeleton is wired up and deployed. Next.js, Supabase, and your design system are all in place. Now let\'s build real features.',
+  'Auth, schema, file uploads, server components — all wired up. You have a working product. Time to make it production-grade.',
+  'Admin panel, transactional email, background jobs, payments. This is a real product. One phase left.',
+  'You shipped. Not a tutorial project. Not a side project you\'ll "finish someday." A production app. 🚀'
+]
+const phaseGlyphs = ['🧠', '🏗️', '⚡', '🔧', '🚀']
+let phaseCompleteTargetLesson = null
+
+function showPhaseComplete(phase) {
+  const nextPhase = curriculum.find(p => p.phaseNum === phase.phaseNum + 1)
+  phaseCompleteTargetLesson = nextPhase ? nextPhase.lessons[0].id : null
+
+  document.getElementById('pc-glyph').textContent = phaseGlyphs[phase.phaseNum - 1]
+  document.getElementById('pc-eyebrow').textContent = `Phase ${phase.phaseNum} Complete`
+  document.getElementById('pc-title').textContent = `${phase.phase} — Done.`
+  document.getElementById('pc-msg').textContent = phaseMessages[phase.phaseNum - 1]
+
+  const nextBtn = document.getElementById('pc-next-btn')
+  if (nextPhase) {
+    nextBtn.textContent = `Start Phase ${nextPhase.phaseNum}: ${nextPhase.phase} →`
+  } else {
+    nextBtn.textContent = 'Back to Home 🏁'
+  }
+
+  // Small delay so the mark-complete button state settles first
+  setTimeout(() => {
+    document.getElementById('phase-complete-overlay').classList.add('show')
+  }, 400)
+}
+
+function dismissPhaseComplete() {
+  document.getElementById('phase-complete-overlay').classList.remove('show')
+}
+
+function phaseCompleteNext() {
+  dismissPhaseComplete()
+  if (phaseCompleteTargetLesson) {
+    setTimeout(() => showLesson(phaseCompleteTargetLesson), 250)
+  } else {
+    setTimeout(() => showHome(), 250)
   }
 }
 
@@ -3991,8 +4169,10 @@ document.addEventListener('keydown', (e) => {
     else showHome()
   }
   if (e.key === 'Escape') {
+    const overlayOpen = document.getElementById('phase-complete-overlay').classList.contains('show')
     const drawerOpen = document.getElementById('notes-drawer').classList.contains('open')
-    if (drawerOpen) closeNotes()
+    if (overlayOpen) dismissPhaseComplete()
+    else if (drawerOpen) closeNotes()
     else showHome()
   }
   if (e.key === 'n' || e.key === 'N') {
