@@ -791,18 +791,303 @@
   .tag-red { background: rgba(255,108,108,0.15); color: var(--accent2); }
   .tag-gold { background: rgba(255,208,96,0.15); color: var(--gold); }
 
+  /* NOTES FAB */
+  .notes-fab {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 98;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .notes-fab:hover { border-color: var(--accent); color: var(--accent); }
+  .notes-fab.visible { display: flex; }
+
+  /* NOTES DRAWER */
+  .notes-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .notes-backdrop.open { opacity: 1; pointer-events: all; }
+
+  .notes-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 360px;
+    z-index: 100;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+  .notes-drawer.open { transform: translateX(0); }
+
+  .notes-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .notes-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .notes-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .notes-close:hover { color: var(--text); }
+
+  .notes-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px 20px;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .notes-textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .notes-textarea:focus { border-color: var(--accent); }
+  .notes-textarea::placeholder { color: var(--muted); }
+
+  .notes-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .notes-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent3);
+    min-height: 14px;
+  }
+  .notes-chars {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* PHASE COMPLETION OVERLAY */
+  .phase-complete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(10,10,15,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .phase-complete-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .phase-complete-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.35s ease;
+    position: relative;
+  }
+  .phase-complete-overlay.show .phase-complete-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .phase-complete-glyph {
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: block;
+    animation: pulseBounce 0.6s ease 0.3s both;
+  }
+  @keyframes pulseBounce {
+    0%   { transform: scale(0.5); opacity: 0; }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .phase-complete-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 12px;
+  }
+
+  .phase-complete-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .phase-complete-msg {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .phase-complete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .phase-next-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .phase-next-btn:hover { background: #6a5af0; transform: translateY(-1px); }
+
+  .phase-dismiss-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .phase-dismiss-btn:hover { color: var(--text); }
+
+  /* HAMBURGER (hidden on desktop) */
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 201;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .hamburger:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MOBILE SIDEBAR BACKDROP */
+  .mobile-sb-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0,0,0,0.55);
+  }
+  .mobile-sb-backdrop.open { display: block; }
+
   /* RESPONSIVE */
   @media (max-width: 768px) {
-    .sidebar { width: 60px; min-width: 60px; }
-    .sidebar .logo-text,
-    .sidebar .progress-bar-wrap,
-    .sidebar .nav-title,
-    .sidebar .phase-label { display: none; opacity: 0; }
-    .sidebar .nav-item { justify-content: center; }
-    .content-area { padding: 24px 20px 60px; }
-    .hero-title { font-size: 32px; }
-    .stats-row { gap: 20px; }
-    .phase-cards { grid-template-columns: 1fr 1fr; }
+    .hamburger { display: flex; }
+
+    /* Sidebar becomes a fixed full-height overlay */
+    .sidebar {
+      position: fixed !important;
+      top: 0; left: 0; bottom: 0;
+      width: 280px !important;
+      min-width: 280px !important;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.mobile-open { transform: translateX(0); }
+
+    /* Always show full sidebar content when it's an overlay */
+    .sidebar .logo-text { display: block !important; opacity: 1 !important; width: auto !important; }
+    .sidebar .progress-bar-wrap { display: block !important; opacity: 1 !important; }
+    .sidebar .nav-title { display: block !important; opacity: 1 !important; width: auto !important; }
+    .sidebar .phase-label { display: block !important; }
+    .sidebar .nav-item { justify-content: flex-start !important; padding: 9px 20px !important; }
+
+    /* Hide the desktop collapse toggle on mobile */
+    .toggle-btn { display: none !important; }
+
+    /* Main fills full width since sidebar is out of flow */
+    .main { width: 100%; }
+
+    .content-area { padding: 68px 20px 80px; }
+    .hero-section { padding: 20px 0 32px; }
+    .hero-title { font-size: 30px; }
+    .hero-sub { font-size: 14px; }
+    .stats-row { gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .phase-cards { grid-template-columns: 1fr; }
+
+    /* Notes drawer full-width on mobile */
+    .notes-drawer { width: 100%; }
+    .notes-fab { bottom: 20px; right: 16px; }
   }
 </style>
 </head>
@@ -835,6 +1120,43 @@
   <!-- MAIN -->
   <div class="main" id="main">
     <div class="content-area" id="content-area"></div>
+  </div>
+</div>
+
+<!-- MOBILE HAMBURGER + SIDEBAR BACKDROP -->
+<button class="hamburger" id="hamburger" onclick="toggleMobileSidebar()">☰</button>
+<div class="mobile-sb-backdrop" id="mobile-sb-backdrop" onclick="closeMobileSidebar()"></div>
+
+<!-- PHASE COMPLETE OVERLAY -->
+<div class="phase-complete-overlay" id="phase-complete-overlay">
+  <div class="phase-complete-card">
+    <span class="phase-complete-glyph" id="pc-glyph">🎉</span>
+    <div class="phase-complete-eyebrow" id="pc-eyebrow">Phase Complete</div>
+    <div class="phase-complete-title" id="pc-title">Foundation Complete</div>
+    <div class="phase-complete-msg" id="pc-msg"></div>
+    <div class="phase-complete-actions">
+      <button class="phase-next-btn" id="pc-next-btn" onclick="phaseCompleteNext()">Continue →</button>
+      <button class="phase-dismiss-btn" onclick="dismissPhaseComplete()">Stay here</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES FAB -->
+<button class="notes-fab" id="notes-fab" onclick="openNotes()">📝 Notes</button>
+
+<!-- NOTES DRAWER -->
+<div class="notes-backdrop" id="notes-backdrop" onclick="closeNotes()"></div>
+<div class="notes-drawer" id="notes-drawer">
+  <div class="notes-header">
+    <div class="notes-title" id="notes-title">Notes</div>
+    <button class="notes-close" onclick="closeNotes()">×</button>
+  </div>
+  <div class="notes-body">
+    <textarea class="notes-textarea" id="notes-textarea" placeholder="Write your notes for this lesson…&#10;&#10;Ideas, questions, things to remember."></textarea>
+    <div class="notes-footer">
+      <span class="notes-status" id="notes-status"></span>
+      <span class="notes-chars" id="notes-chars">0 chars</span>
+    </div>
   </div>
 </div>
 
@@ -3501,10 +3823,11 @@ function updateProgress() {
 }
 
 // ============================================================
-// TOGGLE SIDEBAR
+// TOGGLE SIDEBAR (desktop collapse)
 // ============================================================
 let sidebarOpen = true
 function toggleSidebar() {
+  if (window.innerWidth <= 768) return
   sidebarOpen = !sidebarOpen
   const sb = document.getElementById('sidebar')
   const btn = document.getElementById('toggle-btn')
@@ -3518,10 +3841,34 @@ function toggleSidebar() {
 }
 
 // ============================================================
+// MOBILE SIDEBAR
+// ============================================================
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar')
+  const isOpen = sb.classList.contains('mobile-open')
+  isOpen ? closeMobileSidebar() : openMobileSidebar()
+}
+
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open')
+  document.getElementById('mobile-sb-backdrop').classList.add('open')
+  document.getElementById('hamburger').textContent = '×'
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open')
+  document.getElementById('mobile-sb-backdrop').classList.remove('open')
+  document.getElementById('hamburger').textContent = '☰'
+}
+
+// ============================================================
 // HOME SCREEN
 // ============================================================
 function showHome() {
   currentLessonId = null
+  closeNotes()
+  closeMobileSidebar()
+  document.getElementById('notes-fab').classList.remove('visible')
   buildSidebar()
 
   const content = document.getElementById('content-area')
@@ -3589,6 +3936,7 @@ function showLesson(id) {
   currentLessonId = id
   const lesson = allLessons.find(l => l.id === id)
   if (!lesson) return
+  closeMobileSidebar()
   buildSidebar()
 
   const prevLesson = allLessons.find(l => l.id === id - 1)
@@ -3637,6 +3985,7 @@ function showLesson(id) {
     })
   }
 
+  document.getElementById('notes-fab').classList.add('visible')
   content.scrollTop = 0
   document.getElementById('main').scrollTop = 0
 }
@@ -3653,7 +4002,8 @@ function toggleSection(id) {
 // MARK DONE
 // ============================================================
 function markDone(id) {
-  if (completedLessons.has(id)) {
+  const wasComplete = completedLessons.has(id)
+  if (wasComplete) {
     completedLessons.delete(id)
   } else {
     completedLessons.add(id)
@@ -3665,6 +4015,63 @@ function markDone(id) {
     btn.classList.toggle('done', completedLessons.has(id))
     btn.textContent = completedLessons.has(id) ? '✓ Completed' : 'Mark Complete'
   }
+
+  // Check for phase completion (only when marking complete, not un-marking)
+  if (!wasComplete) {
+    const phase = curriculum.find(p => p.lessons.some(l => l.id === id))
+    if (phase) {
+      const allPhaseLessonsDone = phase.lessons.every(l => completedLessons.has(l.id))
+      if (allPhaseLessonsDone) showPhaseComplete(phase)
+    }
+  }
+}
+
+// ============================================================
+// PHASE COMPLETION
+// ============================================================
+const phaseMessages = [
+  'You\'ve internalized the vibe coding mental model. The mental shift from bricklayer to architect is done. Time to build.',
+  'Your project skeleton is wired up and deployed. Next.js, Supabase, and your design system are all in place. Now let\'s build real features.',
+  'Auth, schema, file uploads, server components — all wired up. You have a working product. Time to make it production-grade.',
+  'Admin panel, transactional email, background jobs, payments. This is a real product. One phase left.',
+  'You shipped. Not a tutorial project. Not a side project you\'ll "finish someday." A production app. 🚀'
+]
+const phaseGlyphs = ['🧠', '🏗️', '⚡', '🔧', '🚀']
+let phaseCompleteTargetLesson = null
+
+function showPhaseComplete(phase) {
+  const nextPhase = curriculum.find(p => p.phaseNum === phase.phaseNum + 1)
+  phaseCompleteTargetLesson = nextPhase ? nextPhase.lessons[0].id : null
+
+  document.getElementById('pc-glyph').textContent = phaseGlyphs[phase.phaseNum - 1]
+  document.getElementById('pc-eyebrow').textContent = `Phase ${phase.phaseNum} Complete`
+  document.getElementById('pc-title').textContent = `${phase.phase} — Done.`
+  document.getElementById('pc-msg').textContent = phaseMessages[phase.phaseNum - 1]
+
+  const nextBtn = document.getElementById('pc-next-btn')
+  if (nextPhase) {
+    nextBtn.textContent = `Start Phase ${nextPhase.phaseNum}: ${nextPhase.phase} →`
+  } else {
+    nextBtn.textContent = 'Back to Home 🏁'
+  }
+
+  // Small delay so the mark-complete button state settles first
+  setTimeout(() => {
+    document.getElementById('phase-complete-overlay').classList.add('show')
+  }, 400)
+}
+
+function dismissPhaseComplete() {
+  document.getElementById('phase-complete-overlay').classList.remove('show')
+}
+
+function phaseCompleteNext() {
+  dismissPhaseComplete()
+  if (phaseCompleteTargetLesson) {
+    setTimeout(() => showLesson(phaseCompleteTargetLesson), 250)
+  } else {
+    setTimeout(() => showHome(), 250)
+  }
 }
 
 // ============================================================
@@ -3674,7 +4081,60 @@ function toggleTask(el) {
   el.classList.toggle('checked')
   const checkbox = el.querySelector('.task-checkbox')
   checkbox.textContent = el.classList.contains('checked') ? '✓' : ''
+
+  const taskKey = `lesson-${currentLessonId}`
+  const allTasks = [...document.querySelectorAll('.task-item')]
+  const checkedIndices = allTasks
+    .map((t, i) => t.classList.contains('checked') ? i : -1)
+    .filter(i => i !== -1)
+  completedTasks[taskKey] = checkedIndices
+  saveState()
 }
+
+// ============================================================
+// NOTES DRAWER
+// ============================================================
+let notesTimer = null
+
+function openNotes() {
+  const drawer = document.getElementById('notes-drawer')
+  const backdrop = document.getElementById('notes-backdrop')
+  const ta = document.getElementById('notes-textarea')
+  const lesson = allLessons.find(l => l.id === currentLessonId)
+  document.getElementById('notes-title').textContent =
+    lesson ? `Notes — Lesson ${lesson.id}` : 'Notes'
+  ta.value = currentLessonId
+    ? (localStorage.getItem(`notes-${currentLessonId}`) || '')
+    : ''
+  updateNotesChars()
+  drawer.classList.add('open')
+  backdrop.classList.add('open')
+  ta.focus()
+}
+
+function closeNotes() {
+  document.getElementById('notes-drawer').classList.remove('open')
+  document.getElementById('notes-backdrop').classList.remove('open')
+}
+
+function updateNotesChars() {
+  const ta = document.getElementById('notes-textarea')
+  document.getElementById('notes-chars').textContent = ta.value.length + ' chars'
+}
+
+document.getElementById('notes-textarea').addEventListener('input', () => {
+  updateNotesChars()
+  const status = document.getElementById('notes-status')
+  status.textContent = ''
+  clearTimeout(notesTimer)
+  notesTimer = setTimeout(() => {
+    if (currentLessonId) {
+      localStorage.setItem(`notes-${currentLessonId}`, document.getElementById('notes-textarea').value)
+    }
+    status.textContent = '✓ Saved'
+    setTimeout(() => { status.textContent = '' }, 1500)
+  }, 500)
+})
 
 // ============================================================
 // COPY CODE
@@ -3696,6 +4156,9 @@ function copyCode(btn) {
 // KEYBOARD NAV
 // ============================================================
 document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement.tagName
+  if (tag === 'TEXTAREA' || tag === 'INPUT') return
+
   if (e.key === 'ArrowRight' && currentLessonId) {
     const next = allLessons.find(l => l.id === currentLessonId + 1)
     if (next) showLesson(next.id)
@@ -3705,7 +4168,19 @@ document.addEventListener('keydown', (e) => {
     if (prev) showLesson(prev.id)
     else showHome()
   }
-  if (e.key === 'Escape') showHome()
+  if (e.key === 'Escape') {
+    const overlayOpen = document.getElementById('phase-complete-overlay').classList.contains('show')
+    const drawerOpen = document.getElementById('notes-drawer').classList.contains('open')
+    if (overlayOpen) dismissPhaseComplete()
+    else if (drawerOpen) closeNotes()
+    else showHome()
+  }
+  if (e.key === 'n' || e.key === 'N') {
+    if (currentLessonId) {
+      const drawerOpen = document.getElementById('notes-drawer').classList.contains('open')
+      drawerOpen ? closeNotes() : openNotes()
+    }
+  }
 })
 
 // ============================================================
