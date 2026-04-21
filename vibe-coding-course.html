@@ -1,0 +1,3722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding: Production Apps — Full Curriculum</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c6cff;
+    --accent2: #ff6c6c;
+    --accent3: #6cffb8;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --code-bg: #0d0d18;
+    --gold: #ffd060;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* LAYOUT */
+  .app { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s ease;
+  }
+
+  .sidebar.collapsed { width: 60px; min-width: 60px; }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar.collapsed .sidebar-header { padding: 24px 12px 16px; }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .logo-text { transition: opacity 0.2s; }
+  .sidebar.collapsed .logo-text { opacity: 0; width: 0; overflow: hidden; }
+
+  .progress-bar-wrap {
+    margin-top: 12px;
+    transition: opacity 0.2s;
+  }
+  .sidebar.collapsed .progress-bar-wrap { opacity: 0; pointer-events: none; }
+
+  .progress-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .nav-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  .phase-group { margin-bottom: 4px; }
+
+  .phase-header {
+    padding: 10px 20px 6px;
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: padding 0.3s;
+  }
+
+  .sidebar.collapsed .phase-header { padding: 10px 12px 6px; }
+  .sidebar.collapsed .phase-label { display: none; }
+
+  .phase-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-item {
+    padding: 9px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .sidebar.collapsed .nav-item { padding: 9px 12px; justify-content: center; }
+
+  .nav-item:hover { background: var(--surface2); }
+
+  .nav-item.active {
+    background: rgba(124, 108, 255, 0.1);
+    border-left-color: var(--accent);
+  }
+
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    width: 20px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .nav-item.active .nav-num { color: var(--accent); }
+
+  .nav-title {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.3;
+    flex: 1;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar.collapsed .nav-title { opacity: 0; width: 0; overflow: hidden; display: none; }
+
+  .nav-done {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--bg);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .nav-item.done .nav-done { opacity: 1; }
+
+  .toggle-btn {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--muted);
+    z-index: 10;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .content-area {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LESSON HEADER */
+  .lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .phase-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(124, 108, 255, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(124, 108, 255, 0.3);
+  }
+
+  .lesson-num-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .lesson-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lesson-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--text) 60%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .lesson-subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+
+  /* SECTION CARDS */
+  .section {
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .section:hover { border-color: rgba(124, 108, 255, 0.4); }
+
+  .section-header {
+    padding: 16px 20px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .section-chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.25s;
+  }
+
+  .section.open .section-chevron { transform: rotate(180deg); }
+
+  .section-body {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s;
+    background: var(--surface2);
+  }
+
+  .section.open .section-body {
+    max-height: 3000px;
+    padding: 20px;
+  }
+
+  /* TYPOGRAPHY IN SECTIONS */
+  .section-body p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: #c8c8d8;
+    margin-bottom: 12px;
+  }
+
+  .section-body h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 16px 0 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .section-body ul, .section-body ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  .section-body li {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #c8c8d8;
+    margin-bottom: 4px;
+  }
+
+  .section-body strong { color: var(--text); font-weight: 500; }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .copy-btn:hover { color: var(--accent3); border-color: var(--accent3); }
+  .copy-btn.copied { color: var(--accent3); border-color: var(--accent3); }
+
+  .code-content {
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  .code-content pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #c8d3f5;
+    white-space: pre;
+  }
+
+  .kw { color: #c099ff; }
+  .str { color: #c3e88d; }
+  .cm { color: #636da6; font-style: italic; }
+  .fn { color: #82aaff; }
+  .var { color: #ff98a4; }
+  .num { color: #ff966c; }
+  .op { color: #89ddff; }
+
+  /* CALLOUT BOXES */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .callout-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c8c8d8;
+  }
+
+  .callout.warning {
+    background: rgba(255, 108, 108, 0.08);
+    border: 1px solid rgba(255, 108, 108, 0.25);
+  }
+
+  .callout.tip {
+    background: rgba(108, 255, 184, 0.08);
+    border: 1px solid rgba(108, 255, 184, 0.25);
+  }
+
+  .callout.info {
+    background: rgba(124, 108, 255, 0.08);
+    border: 1px solid rgba(124, 108, 255, 0.25);
+  }
+
+  .callout.gold {
+    background: rgba(255, 208, 96, 0.08);
+    border: 1px solid rgba(255, 208, 96, 0.25);
+  }
+
+  /* ASSIGNMENT BOX */
+  .assignment-box {
+    background: linear-gradient(135deg, rgba(124, 108, 255, 0.1), rgba(108, 255, 184, 0.05));
+    border: 1px solid rgba(124, 108, 255, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .assignment-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-list { list-style: none; padding: 0; }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+  }
+
+  .task-item:last-child { border-bottom: none; }
+
+  .task-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 2px;
+  }
+
+  .task-item.checked .task-checkbox {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: var(--bg);
+    font-size: 10px;
+  }
+
+  .task-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #c8c8d8;
+    transition: color 0.2s;
+  }
+
+  .task-item.checked .task-text {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  /* NAVIGATION BUTTONS */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .nav-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .nav-btn.primary:hover { background: #6a5af0; }
+
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { border-color: var(--border); color: var(--text); }
+
+  .mark-done-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--accent3);
+    background: rgba(108, 255, 184, 0.08);
+    color: var(--accent3);
+  }
+
+  .mark-done-btn:hover { background: rgba(108, 255, 184, 0.15); }
+  .mark-done-btn.done { background: var(--accent3); color: var(--bg); }
+
+  /* HOME SCREEN */
+  .home-screen { animation: fadeIn 0.4s ease; }
+
+  .hero-section {
+    text-align: center;
+    padding: 60px 0 40px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    letter-spacing: -1px;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+
+  .stat { text-align: center; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .phase-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .phase-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .phase-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+  }
+
+  .phase-card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .phase-card-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .phase-card-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .start-btn:hover { background: #6a5af0; transform: translateY(-1px); }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 12px;
+  }
+
+  .data-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: #c8c8d8;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+
+  .tag-accent { background: rgba(124,108,255,0.2); color: var(--accent); }
+  .tag-green { background: rgba(108,255,184,0.15); color: var(--accent3); }
+  .tag-red { background: rgba(255,108,108,0.15); color: var(--accent2); }
+  .tag-gold { background: rgba(255,208,96,0.15); color: var(--gold); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar { width: 60px; min-width: 60px; }
+    .sidebar .logo-text,
+    .sidebar .progress-bar-wrap,
+    .sidebar .nav-title,
+    .sidebar .phase-label { display: none; opacity: 0; }
+    .sidebar .nav-item { justify-content: center; }
+    .content-area { padding: 24px 20px 60px; }
+    .hero-title { font-size: 32px; }
+    .stats-row { gap: 20px; }
+    .phase-cards { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text" style="line-height:1.2">
+          <div>Vibe Coding</div>
+          <div style="font-weight:400;font-size:11px;color:var(--muted)">Production Apps</div>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label">
+          <span>Progress</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="toggle-btn" onclick="toggleSidebar()" id="toggle-btn">◀</div>
+    </div>
+    <div class="nav-scroll" id="nav-scroll"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+    <div class="content-area" id="content-area"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CURRICULUM DATA
+// ============================================================
+const curriculum = [
+  {
+    phase: "Foundation",
+    phaseNum: 1,
+    color: "#7c6cff",
+    lessons: [
+      {
+        id: 1,
+        title: "The Vibe Coding Mental Model",
+        subtitle: "Understand WHY this approach beats traditional coding and what your new job actually is.",
+        time: "30 min",
+        sections: [
+          {
+            icon: "🎯",
+            label: "The Big Picture",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p><strong>Vibe coding is not about writing less code — it's about operating at the architecture level</strong> while Claude Code handles implementation detail. Your bottleneck shifts from <em>typing</em> to <em>thinking clearly</em>.</p>
+              <p>This is the highest-leverage skill shift of 2025. Engineers who master this ship 10x faster without sacrificing quality — and founders without deep engineering backgrounds can now build production apps.</p>
+              <div class="callout tip">
+                <div class="callout-icon">💡</div>
+                <div class="callout-text">The quality of your <strong>output</strong> is now entirely determined by the quality of your <strong>input</strong> to Claude Code. A precise spec = a production app. A vague prompt = spaghetti.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🧠",
+            label: "The Mental Model",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <h4>The Architect vs The Bricklayer</h4>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">model</span></div>
+                <div class="code-content"><pre>
+OLD WAY:  You = Bricklayer
+          Write every line, Google every error,
+          context-switch constantly, get stuck on syntax
+
+VIBE WAY: You = Architect
+          Write the SPEC (blueprint)
+          Claude Code = Bricklayer (never gets tired, knows every library)
+          Your job: decisions + direction + review
+
+The 3 Laws:
+  LAW 1: SPEC FIRST, CODE NEVER
+         Never start a session without a written spec.
+         5 bullet points beats "just start coding"
+
+  LAW 2: ONE CONTEXT, ONE JOB
+         Each session = one feature
+         Never ask it to do auth + dashboard + email together
+         Context pollution → spaghetti output
+
+  LAW 3: YOU ARE THE QA ENGINEER
+         Claude ships fast but doesn't know your business logic
+         You review every output: "Does this match the spec?"
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📐",
+            label: "The Core (80/20)",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <h4>5 things that determine your success with vibe coding</h4>
+              <ol>
+                <li><strong>Spec quality is everything.</strong> The more precise your requirements, constraints, and acceptance criteria — the less you debug. Write specs like you're hiring a contractor.</li>
+                <li><strong>Stack consistency matters.</strong> Using the same stack across projects means Claude Code has deep context and rarely hallucinates. Our stack (Next.js + Supabase + Tailwind) is Claude's strongest territory.</li>
+                <li><strong>One session = one job.</strong> Splitting features into focused sessions prevents context contamination. Name your sessions: "Build auth flow", "Add file upload", etc.</li>
+                <li><strong>You must understand the output.</strong> You don't write the code but you must be able to read it. If you can't read it, you can't review it. If you can't review it, you'll ship bugs.</li>
+                <li><strong>Iteration is the strategy.</strong> Ship a working skeleton first, then layer features. Don't spec a perfect app on day one — spec a working MVP and iterate.</li>
+              </ol>
+            `
+          },
+          {
+            icon: "⚡",
+            label: "Your Master Prompt Template",
+            color: "rgba(124,108,255,0.1)",
+            content: `
+              <p>Use this skeleton to open <strong>every single Claude Code session</strong>. Copy, fill in, paste.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">markdown — claude code session prompt</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+## CONTEXT
+App: [SyncMaster / FinApp name]
+Stack: Next.js 14 App Router, TypeScript, Tailwind CSS,
+       shadcn/ui, Supabase (auth/db/storage), Resend email,
+       Vercel deployment, Vercel Cron for background jobs
+
+## CURRENT STATE
+[What already exists — list relevant files]
+[Any recent changes or broken things]
+
+## THE JOB
+Build: [ONE specific feature — be precise]
+
+## ACCEPTANCE CRITERIA
+- [ ] Specific thing that must work
+- [ ] Edge case that must be handled
+- [ ] Error state that must be visible to user
+- [ ] TypeScript types must be correct
+
+## CONSTRAINTS
+- Use server components unless interactivity required
+- All DB access via Supabase server client (not browser client)
+- RLS must be enabled on any new table
+- No hardcoded values — use environment variables
+- TypeScript strict mode, no \`any\`
+- Tailwind + shadcn/ui only — no custom CSS files
+- All user-facing errors must show a toast or inline message
+
+## OUTPUT EXPECTED
+- List the files you'll create/modify before writing any code
+- Ask me if anything is ambiguous before proceeding
+                </pre></div>
+              </div>
+              <div class="callout warning">
+                <div class="callout-icon">⚠️</div>
+                <div class="callout-text">The <strong>CONSTRAINTS</strong> section is where most beginners fail. Without constraints, Claude will invent solutions that are hard to maintain. Your constraints ARE your architectural decisions.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🚫",
+            label: "Common Traps",
+            color: "rgba(255,108,108,0.1)",
+            content: `
+              <ul>
+                <li><strong>The "just build the whole app" prompt.</strong> This produces monolithic, untestable output. Always break into single features.</li>
+                <li><strong>Not reading the output.</strong> Claude might solve the problem in a way that conflicts with your architecture. Read every file it creates.</li>
+                <li><strong>Skipping the spec because "it's a small feature."</strong> Small features with no spec create 80% of debugging time.</li>
+                <li><strong>Accepting hallucinated imports.</strong> Claude sometimes imports libraries that don't exist or uses deprecated APIs. Always verify library names and versions.</li>
+                <li><strong>No .env discipline.</strong> Hardcoded secrets in code pushed to GitHub is the #1 security mistake beginners make.</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-icon">🔥</div>
+                <div class="callout-text">Never commit a <code>.env.local</code> file. Ever. Add it to <code>.gitignore</code> before writing your first line of code.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 30-Minute Assignment</div>
+                <ul class="task-list" id="tasks-1">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Open your terminal. Run: <code>npx create-next-app@latest syncmaster --typescript --tailwind --app --import-alias="@/*"</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Install core deps: <code>npm install @supabase/supabase-js @supabase/ssr && npx shadcn@latest init</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create <code>.env.local</code> with your Supabase keys (get them from supabase.com → Project Settings → API)</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Confirm <code>.gitignore</code> contains <code>.env.local</code> before first commit</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Write your first spec using the Master Prompt Template for "Build the home page skeleton"</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Project Spec Engineering",
+        subtitle: "The document that drives every Claude Code session. Getting this right = 10x faster development.",
+        time: "45 min",
+        sections: [
+          {
+            icon: "🎯",
+            label: "Why Specs Are Your #1 Skill",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>A Product Requirements Document (PRD) is the highest-leverage document you write. It replaces 20 back-and-forth prompts with 1 precise instruction. It forces YOU to think through the product before Claude touches a line of code.</p>
+              <p><strong>Every session with Claude Code starts from your spec.</strong> The spec is the contract. Without it, you're coding drunk.</p>
+              <div class="callout gold">
+                <div class="callout-icon">🏆</div>
+                <div class="callout-text">Senior engineers don't write more code — they write better specs. Your job is to think like a product engineer: WHO uses this, WHAT do they need, WHEN do things happen, WHAT happens when things fail.</div>
+              </div>
+            `
+          },
+          {
+            icon: "📄",
+            label: "The AI-First PRD Template",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <p>This is the spec format optimized for Claude Code consumption. Use it for every feature and every app.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">markdown — prd template</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+# [APP NAME] — Feature: [Feature Name]
+Version: 1.0 | Status: Draft | Date: [date]
+
+## 1. PROBLEM STATEMENT
+What problem does this solve? For who? 
+One paragraph, be specific.
+
+## 2. USER STORIES
+As a [user type], I want to [action] so that [benefit].
+- As a musician, I want to upload a track so my fans can stream it
+- As an admin, I want to see all users so I can moderate content
+
+## 3. SCREENS & FLOWS
+List every screen involved:
+  /upload         → Upload form + drag-drop zone
+  /tracks         → Grid of published tracks
+  /tracks/[id]    → Single track player page
+
+Flow: User lands on /upload → fills form → uploads file
+      → sees progress bar → redirected to /tracks/[id]
+
+## 4. DATA MODEL
+Tables needed:
+  tracks (id, user_id, title, file_url, duration, status, created_at)
+  
+RLS Rules:
+  - SELECT: authenticated users can read published tracks
+  - INSERT: user can only insert their own tracks (user_id = auth.uid())
+  - UPDATE/DELETE: own tracks only
+
+## 5. API ROUTES
+  POST /api/tracks/upload   → Upload file to Supabase Storage
+  GET  /api/tracks          → List published tracks
+  GET  /api/tracks/[id]     → Single track
+
+## 6. COMPONENT BREAKDOWN
+  <UploadForm />      → Handles file + metadata input
+  <TrackGrid />       → Displays track cards  
+  <TrackPlayer />     → Audio playback + waveform
+  <ProgressToast />   → Upload progress feedback
+
+## 7. ERROR STATES
+  - File too large (>50MB)  → Show size limit message
+  - Invalid format           → Show accepted formats
+  - Upload fails             → Show retry option + keep form state
+  - Unauthenticated          → Redirect to /login
+
+## 8. OUT OF SCOPE (v1)
+  - Comments / reactions
+  - Playlist functionality
+  - Analytics dashboard
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🔬",
+            label: "SyncMaster Spec — Live Example",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <p>Here's a real spec for SyncMaster's core feature — applying this template to your actual app:</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">markdown — syncmaster prd v1</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+# SyncMaster — Feature: Musician Profile + Track Upload
+Version: 1.0 | Status: Draft
+
+## 1. PROBLEM STATEMENT
+Music producers and session musicians need a central place to
+showcase their work portfolio. They need to upload audio files,
+add metadata (BPM, key, genre), and share a public profile link
+with collaborators and clients.
+
+## 2. USER STORIES
+- As a musician, I want to upload MP3/WAV files with metadata
+- As a musician, I want a public profile URL to share with clients
+- As a visitor, I want to browse/play a musician's tracks
+- As a musician, I want to set tracks as public or private
+
+## 3. SCREENS & FLOWS
+  /onboarding       → First-time setup (name, genre, bio, avatar)
+  /dashboard        → My tracks list + upload button
+  /upload           → Upload form (file + title + BPM + key + genre)
+  /profile/[slug]   → Public profile (readonly)
+  /tracks/[id]/edit → Edit track metadata
+
+## 4. DATA MODEL
+  profiles (id=user_id, display_name, slug, bio, avatar_url,
+            genre, created_at)
+  tracks   (id, user_id, title, file_url, cover_url, bpm,
+            key, genre, duration, is_public, play_count,
+            created_at)
+
+## 5. STORAGE BUCKETS
+  audio-files    → Private. Signed URLs for public tracks only.
+  avatars        → Public. Direct URL access.
+  track-covers   → Public. Direct URL access.
+
+## 6. ERROR STATES
+  File >100MB     → "File too large. Max 100MB"
+  Non-audio file  → "Only MP3, WAV, FLAC accepted"
+  Slug taken      → "This URL is already taken, try another"
+  Upload fail     → Keep form state, show retry with error detail
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🚫",
+            label: "Common Traps",
+            color: "rgba(255,108,108,0.1)",
+            content: `
+              <ul>
+                <li><strong>Skipping error states.</strong> "It'll work" is never a spec. Claude will not invent error handling unless you define it. Define every failure path.</li>
+                <li><strong>No out-of-scope section.</strong> Without this, Claude will try to build everything it can imagine for the feature. Scope creep happens in specs, not in code.</li>
+                <li><strong>Vague user stories.</strong> "As a user I want a good experience" is useless. "As a musician I want to see upload progress as a percentage while my file uploads" is actionable.</li>
+                <li><strong>No RLS rules in the data model.</strong> If you don't spec row-level security rules, Claude might skip them. Security must be explicit.</li>
+              </ul>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 45-Minute Assignment</div>
+                <ul class="task-list" id="tasks-2">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a <code>docs/</code> folder in your project root</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Write your full PRD for your app's core feature using the template above. Save as <code>docs/prd-v1.md</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">List every table your app needs with columns and RLS rules</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Write at least 5 error states — what breaks, what the user sees</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Define your out-of-scope list for v1 (what you're explicitly NOT building yet)</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Stack Architecture Deep Dive",
+        subtitle: "Why every piece of your stack exists and how they connect — the diagram that eliminates confusion.",
+        time: "30 min",
+        sections: [
+          {
+            icon: "🏗️",
+            label: "Your Stack, Explained",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Understanding WHY each tool exists prevents you from misusing it. Most beginner bugs come from using the wrong layer for a job (e.g., running DB queries in client components).</p>
+              <table class="data-table">
+                <tr><th>Layer</th><th>Tool</th><th>WHY this one</th></tr>
+                <tr><td>Frontend</td><td><span class="tag tag-accent">Next.js 14</span></td><td>App Router + Server Components = less JS to browser, better SEO, Claude knows it deeply</td></tr>
+                <tr><td>Styling</td><td><span class="tag tag-accent">Tailwind + shadcn</span></td><td>Claude generates correct Tailwind without hallucinating CSS. shadcn = accessible components, no extra config</td></tr>
+                <tr><td>Language</td><td><span class="tag tag-accent">TypeScript</span></td><td>Catches schema mismatches before runtime. Critical when Claude generates code you didn't write</td></tr>
+                <tr><td>Database</td><td><span class="tag tag-green">Supabase</span></td><td>Postgres + Auth + Storage + Realtime + RLS in one service. Free tier is production-viable</td></tr>
+                <tr><td>Auth</td><td><span class="tag tag-green">Supabase Auth</span></td><td>Email/magic link. No extra service. Integrates with RLS automatically</td></tr>
+                <tr><td>Storage</td><td><span class="tag tag-green">Supabase Storage</span></td><td>S3-compatible, auth-aware, signed URLs for private files</td></tr>
+                <tr><td>Email</td><td><span class="tag tag-gold">Resend</span></td><td>100/day free, React Email templates, Claude generates them correctly</td></tr>
+                <tr><td>Deploy</td><td><span class="tag tag-accent">Vercel</span></td><td>Zero-config Next.js. Preview URLs per branch. Env vars UI built in</td></tr>
+                <tr><td>Jobs</td><td><span class="tag tag-accent">Vercel Cron</span></td><td>Scheduled API routes. No extra infra for background tasks</td></tr>
+              </table>
+            `
+          },
+          {
+            icon: "🔀",
+            label: "The Request Flow Diagram",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <p>Every request through your app follows one of these paths. Knowing this prevents 90% of architectural mistakes.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">architecture flow</span></div>
+                <div class="code-content"><pre>
+Browser Request
+    │
+    ▼
+Vercel Edge (CDN + routing)
+    │
+    ├─── Static assets (images, fonts) ──► CDN cache (instant)
+    │
+    ├─── Server Component (page.tsx)
+    │         │
+    │         ├─ createServerClient(supabase)  ← uses cookies
+    │         ├─ await supabase.from('tracks').select()
+    │         └─ renders HTML with data ──────► Browser (no JS hydration needed)
+    │
+    ├─── Client Component ('use client')
+    │         │
+    │         ├─ createBrowserClient(supabase)
+    │         ├─ useEffect / useState
+    │         └─ sends JS to browser ─────────► Browser (interactive)
+    │
+    └─── API Route (app/api/route.ts)
+              │
+              ├─ POST requests, webhooks, Stripe, Cron jobs
+              ├─ createServerClient with service role key (admin)
+              └─ returns JSON ─────────────────► Client or external service
+
+KEY RULE:
+  Server Component = read data, no interactivity
+  Client Component = interactivity, forms, real-time
+  API Route        = mutations, external webhooks, admin ops
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🗃️",
+            label: "Project Folder Structure",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <p>This is the canonical structure for every app you build. Non-negotiable — it's what Claude Code expects and what keeps your codebase readable.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">project structure</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+my-app/
+├── app/
+│   ├── (auth)/                    ← Route group, no layout
+│   │   ├── login/page.tsx
+│   │   └── signup/page.tsx
+│   ├── (dashboard)/               ← Protected area
+│   │   ├── layout.tsx             ← Auth guard lives HERE
+│   │   ├── dashboard/page.tsx
+│   │   └── tracks/
+│   │       ├── page.tsx           ← Track list
+│   │       └── [id]/page.tsx      ← Single track
+│   ├── admin/                     ← Admin panel
+│   │   └── layout.tsx             ← Admin auth guard
+│   ├── api/                       ← API routes
+│   │   ├── tracks/route.ts
+│   │   └── cron/cleanup/route.ts
+│   ├── layout.tsx                 ← Root layout (fonts, providers)
+│   └── globals.css
+│
+├── components/
+│   ├── ui/                        ← shadcn components (auto-gen)
+│   ├── tracks/                    ← Feature-scoped components
+│   │   ├── TrackCard.tsx
+│   │   ├── TrackPlayer.tsx
+│   │   └── UploadForm.tsx
+│   └── shared/                    ← Reused across features
+│       ├── Navbar.tsx
+│       └── Toast.tsx
+│
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts              ← Browser client (singleton)
+│   │   ├── server.ts              ← Server client (per-request)
+│   │   └── middleware.ts          ← Session refresh
+│   ├── types/
+│   │   └── database.ts            ← Generated from Supabase schema
+│   ├── validations/               ← Zod schemas
+│   └── utils.ts
+│
+├── emails/                        ← React Email templates
+│   └── WelcomeEmail.tsx
+│
+├── supabase/
+│   └── migrations/                ← SQL files, committed to git
+│       └── 001_initial_schema.sql
+│
+├── docs/
+│   └── prd-v1.md                  ← Your spec lives here
+│
+├── .env.local                     ← NEVER commit
+├── .env.example                   ← DO commit (no real values)
+└── middleware.ts                  ← Auth protection at edge
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 30-Minute Assignment</div>
+                <ul class="task-list" id="tasks-3">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create the full folder structure above in your project (use <code>mkdir -p</code> in terminal)</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create <code>.env.example</code> with all key names but no values — commit this to git</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create your Supabase project at supabase.com. Copy keys to <code>.env.local</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Draw the request flow for your app's main feature on paper. Where does data come from? What's a server component vs client component?</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Scaffold",
+    phaseNum: 2,
+    color: "#6cffb8",
+    lessons: [
+      {
+        id: 4,
+        title: "Next.js 14 App Router Mastery",
+        subtitle: "The new mental model for routing, layouts, server vs client components — the shift that trips everyone up.",
+        time: "60 min",
+        sections: [
+          {
+            icon: "🎯",
+            label: "Why App Router Changes Everything",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Next.js 14's App Router is a fundamental shift: <strong>by default, every component is a Server Component</strong>. This means it runs on the server, can directly access databases, and sends zero JavaScript to the browser unless you need interactivity.</p>
+              <div class="callout info">
+                <div class="callout-icon">ℹ️</div>
+                <div class="callout-text">The old Pages Router pattern was: fetch data in getServerSideProps, pass as props. The new pattern is: just await your database call directly in the component. Less boilerplate, faster pages.</div>
+              </div>
+            `
+          },
+          {
+            icon: "⚖️",
+            label: "Server vs Client — The Decision Tree",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">decision tree</span></div>
+                <div class="code-content"><pre>
+Do you need any of these?
+  - onClick / onChange / event handlers?
+  - useState / useEffect / hooks?
+  - Browser APIs (localStorage, window)?
+  - Real-time subscriptions?
+
+YES → Client Component → add 'use client' at top of file
+NO  → Server Component → no directive needed (default)
+
+Component hierarchy rule:
+  Server Component CAN render Client Components ✓
+  Client Component CANNOT render Server Components ✗
+  (you can pass Server data DOWN as props to Client components)
+
+Practical split:
+  page.tsx          → Server Component (fetches data)
+  Layout.tsx        → Server Component (wraps everything)
+  Navbar.tsx        → Client Component (active links, dropdown)
+  DataTable.tsx     → Server Component (displays DB data)
+  UploadForm.tsx    → Client Component (file input, progress)
+  TrackPlayer.tsx   → Client Component (audio API)
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🗂️",
+            label: "Route Groups & Layouts",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <p>Route groups (folders in parentheses) let you share layouts without affecting the URL. This is how you protect routes with an auth check.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — protected layout</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// app/(dashboard)/layout.tsx — Auth guard for all dashboard routes</span>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { redirect } <span class="kw">from</span> <span class="str">'next/navigation'</span>
+
+<span class="kw">export default async function</span> <span class="fn">DashboardLayout</span>({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+  <span class="kw">const</span> { data: { user } } = <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+
+  <span class="kw">if</span> (!user) {
+    <span class="fn">redirect</span>(<span class="str">'/login'</span>)
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"flex min-h-screen"</span>&gt;
+      &lt;Sidebar userId={user.id} /&gt;
+      &lt;main className=<span class="str">"flex-1"</span>&gt;{children}&lt;/main&gt;
+    &lt;/div&gt;
+  )
+}
+<span class="cm">
+// Every route inside (dashboard)/ inherits this layout.
+// /dashboard, /dashboard/tracks, /dashboard/settings
+// all get auth-checked automatically.
+</span>
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📡",
+            label: "Data Fetching Patterns",
+            color: "rgba(124,108,255,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — server component data fetch</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// app/(dashboard)/tracks/page.tsx</span>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { TrackCard } <span class="kw">from</span> <span class="str">'@/components/tracks/TrackCard'</span>
+
+<span class="kw">export default async function</span> <span class="fn">TracksPage</span>() {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+
+  <span class="cm">// Direct DB query — no API route needed for reads</span>
+  <span class="kw">const</span> { data: tracks, error } = <span class="kw">await</span> supabase
+    .from(<span class="str">'tracks'</span>)
+    .select(<span class="str">'id, title, bpm, key, genre, created_at'</span>)
+    .eq(<span class="str">'is_public'</span>, <span class="kw">true</span>)
+    .order(<span class="str">'created_at'</span>, { ascending: <span class="kw">false</span> })
+
+  <span class="kw">if</span> (error) {
+    <span class="kw">return</span> &lt;div&gt;Error loading tracks&lt;/div&gt;
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"grid grid-cols-3 gap-4"</span>&gt;
+      {tracks.<span class="fn">map</span>(track =&gt; (
+        &lt;TrackCard key={track.id} track={track} /&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🚫",
+            label: "Common Traps",
+            color: "rgba(255,108,108,0.1)",
+            content: `
+              <ul>
+                <li><strong>Adding 'use client' to everything.</strong> This defeats the purpose of App Router. Only add it when you actually need browser APIs or hooks.</li>
+                <li><strong>Using the browser Supabase client in a server component.</strong> This leaks your service role key to the browser. Always use <code>createServerClient</code> in server components.</li>
+                <li><strong>Fetching data in useEffect.</strong> Old pattern. In App Router, you fetch in the async server component directly. No loading spinners needed.</li>
+                <li><strong>Nesting client components unnecessarily.</strong> If a parent is 'use client', all its children run on the client too — even if they don't need to.</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-icon">⚠️</div>
+                <div class="callout-text">The most common Claude Code mistake: it sometimes adds 'use client' to page files out of habit. Always review and remove it if there's no interactive behavior in the component.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 60-Minute Assignment</div>
+                <ul class="task-list" id="tasks-4">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create your route group structure: <code>(auth)/</code> and <code>(dashboard)/</code> folders</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the <code>(dashboard)/layout.tsx</code> with auth guard using the code above</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a placeholder <code>dashboard/page.tsx</code> that fetches one row from Supabase and displays it</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test that <code>/dashboard</code> redirects to <code>/login</code> when you're not authenticated</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Supabase: DB + Auth + RLS + Storage",
+        subtitle: "The complete Supabase setup that powers your entire backend — schema, security, and storage in one lesson.",
+        time: "90 min",
+        sections: [
+          {
+            icon: "🎯",
+            label: "Supabase Is Your Backend",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Supabase replaces what used to require: a Postgres database server, a Redis cache, an auth service (Auth0/Clerk), a file storage system (S3), and a WebSocket server for realtime. All free to start, all integrated.</p>
+              <div class="callout gold">
+                <div class="callout-icon">💎</div>
+                <div class="callout-text"><strong>Row Level Security (RLS)</strong> is Supabase's superpower. It enforces authorization rules at the database level — so even if your API route has a bug, users can only ever see their own data. It's like having a security guard inside the database itself.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🗄️",
+            label: "Supabase Client Setup",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — lib/supabase/server.ts</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// lib/supabase/server.ts — Used in Server Components + API Routes</span>
+<span class="kw">import</span> { createServerClient <span class="kw">as</span> createClient } <span class="kw">from</span> <span class="str">'@supabase/ssr'</span>
+<span class="kw">import</span> { cookies } <span class="kw">from</span> <span class="str">'next/headers'</span>
+<span class="kw">import type</span> { Database } <span class="kw">from</span> <span class="str">'@/lib/types/database'</span>
+
+<span class="kw">export async function</span> <span class="fn">createServerClient</span>() {
+  <span class="kw">const</span> cookieStore = <span class="kw">await</span> <span class="fn">cookies</span>()
+
+  <span class="kw">return</span> <span class="fn">createClient</span>&lt;Database&gt;(
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_URL</span>!,
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>!,
+    {
+      cookies: {
+        <span class="fn">getAll</span>() { <span class="kw">return</span> cookieStore.<span class="fn">getAll</span>() },
+        <span class="fn">setAll</span>(cookiesToSet) {
+          cookiesToSet.<span class="fn">forEach</span>(({ name, value, options }) =>
+            cookieStore.<span class="fn">set</span>(name, value, options)
+          )
+        }
+      }
+    }
+  )
+}
+
+<span class="cm">// lib/supabase/client.ts — Used in Client Components only</span>
+<span class="kw">import</span> { createBrowserClient } <span class="kw">from</span> <span class="str">'@supabase/ssr'</span>
+<span class="kw">import type</span> { Database } <span class="kw">from</span> <span class="str">'@/lib/types/database'</span>
+
+<span class="kw">export function</span> <span class="fn">createClient</span>() {
+  <span class="kw">return</span> <span class="fn">createBrowserClient</span>&lt;Database&gt;(
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_URL</span>!,
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>!
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🔐",
+            label: "Row Level Security — The Right Way",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <p>RLS policies run inside Postgres before any data is returned. Think of them as WHERE clauses that users can't override.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">sql — rls policies for tracks table</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">-- Enable RLS on the table (always do this first)</span>
+<span class="kw">ALTER TABLE</span> tracks <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="cm">-- Allow anyone to read public tracks</span>
+<span class="kw">CREATE POLICY</span> <span class="str">"Public tracks are readable by everyone"</span>
+  <span class="kw">ON</span> tracks <span class="kw">FOR</span> <span class="kw">SELECT</span>
+  <span class="kw">USING</span> (is_public = <span class="kw">true</span>);
+
+<span class="cm">-- Users can read their OWN private tracks too</span>
+<span class="kw">CREATE POLICY</span> <span class="str">"Users can read their own private tracks"</span>
+  <span class="kw">ON</span> tracks <span class="kw">FOR</span> <span class="kw">SELECT</span>
+  <span class="kw">USING</span> (auth.<span class="fn">uid</span>() = user_id);
+
+<span class="cm">-- Users can only insert their own tracks</span>
+<span class="kw">CREATE POLICY</span> <span class="str">"Users can insert own tracks"</span>
+  <span class="kw">ON</span> tracks <span class="kw">FOR</span> <span class="kw">INSERT</span>
+  <span class="kw">WITH CHECK</span> (auth.<span class="fn">uid</span>() = user_id);
+
+<span class="cm">-- Users can only update their own tracks</span>
+<span class="kw">CREATE POLICY</span> <span class="str">"Users can update own tracks"</span>
+  <span class="kw">ON</span> tracks <span class="kw">FOR</span> <span class="kw">UPDATE</span>
+  <span class="kw">USING</span> (auth.<span class="fn">uid</span>() = user_id);
+
+<span class="cm">-- Users can only delete their own tracks</span>
+<span class="kw">CREATE POLICY</span> <span class="str">"Users can delete own tracks"</span>
+  <span class="kw">ON</span> tracks <span class="kw">FOR</span> <span class="kw">DELETE</span>
+  <span class="kw">USING</span> (auth.<span class="fn">uid</span>() = user_id);
+                </pre></div>
+              </div>
+              <div class="callout warning">
+                <div class="callout-icon">⚠️</div>
+                <div class="callout-text">If you use the <strong>service role key</strong> in an API route, RLS is bypassed. Only use service role for admin operations. Always use the anon key (with RLS) for user-facing queries.</div>
+              </div>
+            `
+          },
+          {
+            icon: "📦",
+            label: "Supabase Storage for Audio Files",
+            color: "rgba(124,108,255,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — file upload api route</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// app/api/tracks/upload/route.ts</span>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>
+
+<span class="kw">export async function</span> <span class="fn">POST</span>(request: Request) {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+
+  <span class="cm">// Verify user is authenticated</span>
+  <span class="kw">const</span> { data: { user } } = <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+  <span class="kw">if</span> (!user) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> }, { status: <span class="num">401</span> })
+  }
+
+  <span class="kw">const</span> formData = <span class="kw">await</span> request.<span class="fn">formData</span>()
+  <span class="kw">const</span> file = formData.<span class="fn">get</span>(<span class="str">'file'</span>) <span class="kw">as</span> File
+
+  <span class="cm">// Validate file</span>
+  <span class="kw">const</span> allowedTypes = [<span class="str">'audio/mpeg'</span>, <span class="str">'audio/wav'</span>, <span class="str">'audio/flac'</span>]
+  <span class="kw">if</span> (!allowedTypes.<span class="fn">includes</span>(file.type)) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>(
+      { error: <span class="str">'Invalid file type. Use MP3, WAV, or FLAC.'</span> },
+      { status: <span class="num">400</span> }
+    )
+  }
+
+  <span class="kw">const</span> fileName = <span class="str">`\${user.id}/\${Date.now()}-\${file.name}`</span>
+
+  <span class="cm">// Upload to Supabase Storage</span>
+  <span class="kw">const</span> { data, error } = <span class="kw">await</span> supabase.storage
+    .<span class="fn">from</span>(<span class="str">'audio-files'</span>)
+    .<span class="fn">upload</span>(fileName, file, { upsert: <span class="kw">false</span> })
+
+  <span class="kw">if</span> (error) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: error.message }, { status: <span class="num">500</span> })
+  }
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ path: data.path })
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 90-Minute Assignment</div>
+                <ul class="task-list" id="tasks-5">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Write your full schema SQL in <code>supabase/migrations/001_initial.sql</code> — all tables from your PRD</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run the migration in Supabase SQL Editor. Verify all tables exist with correct columns</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Write and apply RLS policies for every table. Test that anon access is blocked</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create your Storage buckets in Supabase dashboard. Set correct public/private policies</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Generate TypeScript types: <code>npx supabase gen types typescript --project-id YOUR_ID > lib/types/database.ts</code></div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Design System in 30 Minutes",
+        subtitle: "Build a consistent, professional UI system with Tailwind + shadcn that Claude Code generates perfectly every time.",
+        time: "30 min",
+        sections: [
+          {
+            icon: "🎨",
+            label: "Why a Design System Matters",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Without a design system, every component Claude generates looks slightly different. With one, your app looks intentional and professional from day one. It takes 30 minutes to set up and saves hours of visual inconsistency.</p>
+              <p>Your design system = your <strong>Tailwind config</strong> (colors, fonts, spacing) + your <strong>shadcn theme</strong> (component defaults) + your <strong>global conventions</strong> (how cards look, how forms behave).</p>
+            `
+          },
+          {
+            icon: "🎨",
+            label: "Tailwind Config — Your Brand Tokens",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — tailwind.config.ts</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import type</span> { Config } <span class="kw">from</span> <span class="str">'tailwindcss'</span>
+
+<span class="kw">const</span> config: Config = {
+  darkMode: [<span class="str">'class'</span>],
+  content: [<span class="str">'./app/**/*.{ts,tsx}'</span>, <span class="str">'./components/**/*.{ts,tsx}'</span>],
+  theme: {
+    extend: {
+      colors: {
+        <span class="cm">// Brand colors — change these to match your product</span>
+        brand: {
+          <span class="str">'50'</span>:  <span class="str">'#f0f0ff'</span>,
+          <span class="str">'100'</span>: <span class="str">'#e0e0ff'</span>,
+          <span class="str">'500'</span>: <span class="str">'#6d6aff'</span>,  <span class="cm">// Primary CTA</span>
+          <span class="str">'600'</span>: <span class="str">'#5b58f0'</span>,  <span class="cm">// Hover state</span>
+          <span class="str">'900'</span>: <span class="str">'#1a1a3e'</span>,  <span class="cm">// Dark background</span>
+        }
+      },
+      fontFamily: {
+        sans: [<span class="str">'var(--font-inter)'</span>],
+        mono: [<span class="str">'var(--font-jetbrains-mono)'</span>],
+      },
+      borderRadius: {
+        lg: <span class="str">'var(--radius)'</span>,
+        md: <span class="str">'calc(var(--radius) - 2px)'</span>,
+        sm: <span class="str">'calc(var(--radius) - 4px)'</span>,
+      }
+    }
+  },
+  plugins: [require(<span class="str">'tailwindcss-animate'</span>)]
+}
+
+<span class="kw">export default</span> config
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🧱",
+            label: "Component Conventions",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <p>Give Claude Code these conventions once in your system prompt and every component it builds will look consistent.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">markdown — design conventions for claude</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+## DESIGN CONVENTIONS
+
+Cards:
+  className="rounded-lg border bg-card text-card-foreground shadow-sm p-6"
+
+Primary Button:
+  Use shadcn &lt;Button&gt; with no size prop (default)
+  Destructive actions: variant="destructive"
+
+Form Inputs:
+  Use shadcn &lt;Input&gt;, &lt;Label&gt;, &lt;Textarea&gt;
+  Always pair with &lt;FormMessage&gt; for validation errors
+  Wrap in &lt;Form&gt; from react-hook-form + zod
+
+Loading States:
+  Use shadcn &lt;Skeleton&gt; for content loading
+  Use spinner inside Button for action loading
+  Never show blank page — always show skeleton
+
+Empty States:
+  Centered layout, icon, title, description, CTA button
+  Example: "No tracks yet. Upload your first track →"
+
+Error States:
+  Use shadcn &lt;Alert variant="destructive"&gt;
+  Always show what went wrong + what the user can do
+
+Page Layout:
+  &lt;div className="container mx-auto max-w-5xl px-4 py-8"&gt;
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 30-Minute Assignment</div>
+                <ul class="task-list" id="tasks-6">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Pick your brand colors (use coolors.co if needed). Update your Tailwind config with real values</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run <code>npx shadcn@latest add button card input label form toast skeleton alert</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a <code>docs/design-conventions.md</code> file with your component conventions. This becomes part of every Claude Code prompt.</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build one Card component manually to test your design tokens look right in the browser</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Core Build",
+    phaseNum: 3,
+    color: "#ffd060",
+    lessons: [
+      {
+        id: 7,
+        title: "Authentication End-to-End",
+        subtitle: "Full auth flow: signup, login, magic link, session management, protected routes — zero auth bugs.",
+        time: "90 min",
+        sections: [
+          {
+            icon: "🔐",
+            label: "Auth Architecture Overview",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Supabase Auth handles everything: JWT tokens, session refresh, email verification, magic links. Your job is to wire it into Next.js middleware and route protection correctly.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">auth flow</span></div>
+                <div class="code-content"><pre>
+User signs up → Supabase creates user + sends verification email
+User clicks link → Supabase sets session cookie via callback route
+User visits /dashboard → middleware reads cookie → allows access
+User refreshes page → middleware refreshes token → stays logged in
+User logs out → Supabase clears cookies → redirected to /login
+
+Key files:
+  middleware.ts              ← Refreshes session on every request
+  app/auth/callback/route.ts ← Handles email verification redirect
+  app/(auth)/login/page.tsx  ← Login form
+  app/(dashboard)/layout.tsx ← Route protection
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🔑",
+            label: "Middleware + Login Form",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — middleware.ts (root)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@supabase/ssr'</span>
+<span class="kw">import</span> { NextResponse, <span class="kw">type</span> NextRequest } <span class="kw">from</span> <span class="str">'next/server'</span>
+
+<span class="kw">export async function</span> <span class="fn">middleware</span>(request: NextRequest) {
+  <span class="kw">let</span> supabaseResponse = NextResponse.<span class="fn">next</span>({ request })
+
+  <span class="kw">const</span> supabase = <span class="fn">createServerClient</span>(
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_URL</span>!,
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>!,
+    {
+      cookies: {
+        <span class="fn">getAll</span>() { <span class="kw">return</span> request.cookies.<span class="fn">getAll</span>() },
+        <span class="fn">setAll</span>(cookiesToSet) {
+          cookiesToSet.<span class="fn">forEach</span>(({ name, value }) =>
+            request.cookies.<span class="fn">set</span>(name, value))
+          supabaseResponse = NextResponse.<span class="fn">next</span>({ request })
+          cookiesToSet.<span class="fn">forEach</span>(({ name, value, options }) =>
+            supabaseResponse.cookies.<span class="fn">set</span>(name, value, options))
+        }
+      }
+    }
+  )
+
+  <span class="cm">// Refresh session — MUST be called in middleware</span>
+  <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+
+  <span class="kw">return</span> supabaseResponse
+}
+
+<span class="kw">export const</span> config = {
+  matcher: [<span class="str">'/((?!_next/static|_next/image|favicon.ico).*))'</span>]
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📝",
+            label: "Login Page",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — app/(auth)/login/page.tsx</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="str">'use client'</span>
+
+<span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> { createClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/client'</span>
+<span class="kw">import</span> { useRouter } <span class="kw">from</span> <span class="str">'next/navigation'</span>
+<span class="kw">import</span> { Button } <span class="kw">from</span> <span class="str">'@/components/ui/button'</span>
+<span class="kw">import</span> { Input } <span class="kw">from</span> <span class="str">'@/components/ui/input'</span>
+
+<span class="kw">export default function</span> <span class="fn">LoginPage</span>() {
+  <span class="kw">const</span> [email, setEmail] = <span class="fn">useState</span>(<span class="str">''</span>)
+  <span class="kw">const</span> [loading, setLoading] = <span class="fn">useState</span>(<span class="kw">false</span>)
+  <span class="kw">const</span> [sent, setSent] = <span class="fn">useState</span>(<span class="kw">false</span>)
+  <span class="kw">const</span> [error, setError] = <span class="fn">useState</span>&lt;string | null&gt;(<span class="kw">null</span>)
+  <span class="kw">const</span> supabase = <span class="fn">createClient</span>()
+  <span class="kw">const</span> router = <span class="fn">useRouter</span>()
+
+  <span class="kw">const</span> <span class="fn">handleMagicLink</span> = <span class="kw">async</span> () => {
+    <span class="fn">setLoading</span>(<span class="kw">true</span>); <span class="fn">setError</span>(<span class="kw">null</span>)
+    <span class="kw">const</span> { error } = <span class="kw">await</span> supabase.auth.<span class="fn">signInWithOtp</span>({
+      email,
+      options: { emailRedirectTo: <span class="str">`\${location.origin}/auth/callback`</span> }
+    })
+    <span class="kw">if</span> (error) <span class="fn">setError</span>(error.message)
+    <span class="kw">else</span> <span class="fn">setSent</span>(<span class="kw">true</span>)
+    <span class="fn">setLoading</span>(<span class="kw">false</span>)
+  }
+
+  <span class="kw">if</span> (sent) <span class="kw">return</span> &lt;p&gt;Check your email for a magic link ✉️&lt;/p&gt;
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"flex flex-col gap-4 max-w-sm mx-auto mt-20"</span>&gt;
+      &lt;h1 className=<span class="str">"text-2xl font-bold"</span>&gt;Sign In&lt;/h1&gt;
+      {error &amp;&amp; &lt;p className=<span class="str">"text-destructive text-sm"</span>&gt;{error}&lt;/p&gt;}
+      &lt;Input
+        type=<span class="str">"email"</span>
+        placeholder=<span class="str">"your@email.com"</span>
+        value={email}
+        onChange={(e) =&gt; <span class="fn">setEmail</span>(e.target.value)}
+      /&gt;
+      &lt;Button onClick={handleMagicLink} disabled={loading || !email}&gt;
+        {loading ? <span class="str">'Sending...'</span> : <span class="str">'Send Magic Link'</span>}
+      &lt;/Button&gt;
+    &lt;/div&gt;
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 90-Minute Assignment</div>
+                <ul class="task-list" id="tasks-7">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Implement <code>middleware.ts</code> exactly as shown above</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the magic link login page and test it with your real email</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create <code>app/auth/callback/route.ts</code> — handles redirect after email click</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test full flow: sign up → receive email → click link → land on /dashboard</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test that visiting /dashboard while logged out redirects to /login</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "Database Schema + RLS Mastery",
+        subtitle: "Design production-grade schemas that scale. Build the security layer that makes your app bulletproof.",
+        time: "60 min",
+        sections: [
+          {
+            icon: "🗄️",
+            label: "Schema Design Principles",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>A good schema is the foundation everything else is built on. Changing it later is expensive. Get it right the first time by following these rules.</p>
+              <ul>
+                <li><strong>UUID primary keys always.</strong> Use <code>gen_random_uuid()</code> — sequential IDs expose your data size to competitors.</li>
+                <li><strong>created_at + updated_at on every table.</strong> You'll always need these for sorting and audit trails.</li>
+                <li><strong>Foreign keys to auth.users, not a profiles table.</strong> Link user data to <code>auth.users(id)</code> directly, then join to profiles.</li>
+                <li><strong>status as enum, not boolean.</strong> <code>status: 'draft' | 'published' | 'archived'</code> beats <code>is_published: boolean</code> for flexibility.</li>
+                <li><strong>Soft deletes over hard deletes.</strong> Add <code>deleted_at TIMESTAMPTZ</code> — never lose data permanently in production.</li>
+              </ul>
+            `
+          },
+          {
+            icon: "📊",
+            label: "SyncMaster Full Schema",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">sql — full production schema</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">-- Enable UUID extension</span>
+<span class="kw">CREATE EXTENSION IF NOT EXISTS</span> <span class="str">"uuid-ossp"</span>;
+
+<span class="cm">-- Profiles (extends auth.users)</span>
+<span class="kw">CREATE TABLE</span> profiles (
+  id          UUID <span class="kw">PRIMARY KEY REFERENCES</span> auth.users(id) <span class="kw">ON DELETE CASCADE</span>,
+  username    TEXT <span class="kw">UNIQUE NOT NULL</span>,
+  display_name TEXT,
+  bio         TEXT,
+  avatar_url  TEXT,
+  website     TEXT,
+  created_at  TIMESTAMPTZ <span class="kw">DEFAULT NOW()</span>,
+  updated_at  TIMESTAMPTZ <span class="kw">DEFAULT NOW()</span>
+);
+
+<span class="cm">-- Tracks</span>
+<span class="kw">CREATE TABLE</span> tracks (
+  id          UUID <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  user_id     UUID <span class="kw">NOT NULL REFERENCES</span> auth.users(id) <span class="kw">ON DELETE CASCADE</span>,
+  title       TEXT <span class="kw">NOT NULL</span>,
+  file_url    TEXT <span class="kw">NOT NULL</span>,
+  cover_url   TEXT,
+  bpm         INTEGER,
+  key         TEXT,
+  genre       TEXT,
+  duration    INTEGER, <span class="cm">-- seconds</span>
+  play_count  INTEGER <span class="kw">DEFAULT 0</span>,
+  status      TEXT <span class="kw">DEFAULT</span> <span class="str">'draft'</span> <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="str">'draft'</span>, <span class="str">'published'</span>, <span class="str">'archived'</span>)),
+  deleted_at  TIMESTAMPTZ, <span class="cm">-- soft delete</span>
+  created_at  TIMESTAMPTZ <span class="kw">DEFAULT NOW()</span>,
+  updated_at  TIMESTAMPTZ <span class="kw">DEFAULT NOW()</span>
+);
+
+<span class="cm">-- Auto-update updated_at trigger</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> <span class="fn">update_updated_at</span>()
+<span class="kw">RETURNS TRIGGER AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">NEW</span>.updated_at = <span class="fn">NOW</span>();
+  <span class="kw">RETURN NEW</span>;
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">CREATE TRIGGER</span> tracks_updated_at
+  <span class="kw">BEFORE UPDATE ON</span> tracks
+  <span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="fn">update_updated_at</span>();
+
+<span class="cm">-- Create profile on user signup (trigger)</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> <span class="fn">handle_new_user</span>()
+<span class="kw">RETURNS TRIGGER AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">INSERT INTO</span> profiles (id, username)
+  <span class="kw">VALUES</span> (<span class="kw">NEW</span>.id, <span class="str">'user_'</span> || <span class="fn">substr</span>(<span class="kw">NEW</span>.id::text, <span class="num">1</span>, <span class="num">8</span>));
+  <span class="kw">RETURN NEW</span>;
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql <span class="kw">SECURITY DEFINER</span>;
+
+<span class="kw">CREATE TRIGGER</span> on_auth_user_created
+  <span class="kw">AFTER INSERT ON</span> auth.users
+  <span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="fn">handle_new_user</span>();
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 60-Minute Assignment</div>
+                <ul class="task-list" id="tasks-8">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run the full schema SQL above in your Supabase SQL editor</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add RLS policies for profiles and tracks tables</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test the trigger: sign up a new user, verify a profile row was auto-created</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Re-generate TypeScript types after schema update</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 9,
+        title: "Server vs Client Components — The Real Rules",
+        subtitle: "The decision that shapes your entire app's performance. Master this and you'll never fight Next.js again.",
+        time: "45 min",
+        sections: [
+          {
+            icon: "⚖️",
+            label: "The Real Decision Framework",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Most tutorials oversimplify this. Here's the real framework used in production Next.js apps:</p>
+              <table class="data-table">
+                <tr><th>Need</th><th>Component Type</th><th>Example</th></tr>
+                <tr><td>Read data from DB</td><td><span class="tag tag-green">Server</span></td><td>tracks/page.tsx</td></tr>
+                <tr><td>Write/mutate data</td><td><span class="tag tag-accent">Server Action</span></td><td>form submit</td></tr>
+                <tr><td>Interactive UI (clicks, input)</td><td><span class="tag tag-gold">Client</span></td><td>UploadForm.tsx</td></tr>
+                <tr><td>Real-time updates</td><td><span class="tag tag-gold">Client</span></td><td>LiveChat.tsx</td></tr>
+                <tr><td>Browser APIs</td><td><span class="tag tag-gold">Client</span></td><td>AudioPlayer.tsx</td></tr>
+                <tr><td>Static display</td><td><span class="tag tag-green">Server</span></td><td>TrackCard.tsx</td></tr>
+                <tr><td>Layout / navigation</td><td><span class="tag tag-green">Server</span></td><td>layout.tsx</td></tr>
+              </table>
+            `
+          },
+          {
+            icon: "⚡",
+            label: "Server Actions — The Modern Mutation Pattern",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <p>Server Actions replace most API routes for mutations. They run on the server but are called directly from forms.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — server action example</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// lib/actions/tracks.ts</span>
+<span class="str">'use server'</span>
+
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { revalidatePath } <span class="kw">from</span> <span class="str">'next/cache'</span>
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>
+
+<span class="kw">const</span> TrackSchema = z.<span class="fn">object</span>({
+  title: z.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">1</span>).<span class="fn">max</span>(<span class="num">100</span>),
+  bpm: z.<span class="fn">number</span>().<span class="fn">min</span>(<span class="num">40</span>).<span class="fn">max</span>(<span class="num">300</span>).<span class="fn">optional</span>(),
+  genre: z.<span class="fn">string</span>().<span class="fn">optional</span>()
+})
+
+<span class="kw">export async function</span> <span class="fn">createTrack</span>(formData: FormData) {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+  <span class="kw">const</span> { data: { user } } = <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+
+  <span class="kw">if</span> (!user) <span class="kw">throw new</span> Error(<span class="str">'Unauthorized'</span>)
+
+  <span class="kw">const</span> validated = TrackSchema.<span class="fn">parse</span>({
+    title: formData.<span class="fn">get</span>(<span class="str">'title'</span>),
+    bpm: Number(formData.<span class="fn">get</span>(<span class="str">'bpm'</span>)),
+    genre: formData.<span class="fn">get</span>(<span class="str">'genre'</span>)
+  })
+
+  <span class="kw">const</span> { error } = <span class="kw">await</span> supabase
+    .from(<span class="str">'tracks'</span>)
+    .<span class="fn">insert</span>({ ...validated, user_id: user.id })
+
+  <span class="kw">if</span> (error) <span class="kw">throw new</span> Error(error.message)
+
+  <span class="cm">// Revalidate the tracks list page cache</span>
+  <span class="fn">revalidatePath</span>(<span class="str">'/dashboard/tracks'</span>)
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 45-Minute Assignment</div>
+                <ul class="task-list" id="tasks-9">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Audit every component in your app — is it correctly server or client? Fix any that are wrong</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Convert one existing API route to a Server Action using the pattern above</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add Zod validation to at least one Server Action</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 10,
+        title: "File Upload Pipeline",
+        subtitle: "Production-grade file uploads: client-side validation, signed URLs, progress tracking, storage policies.",
+        time: "60 min",
+        sections: [
+          {
+            icon: "📤",
+            label: "The Upload Pipeline",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">upload flow</span></div>
+                <div class="code-content"><pre>
+User selects file
+    │
+    ▼
+Client validates (type, size) ──── fail → show error immediately
+    │
+    ▼
+POST /api/upload (formData)
+    │
+    ▼
+Server validates again (never trust client)
+    │
+    ▼
+Upload to Supabase Storage
+    │
+    ├── on progress → send SSE event → client shows %
+    │
+    ▼
+Get public/signed URL
+    │
+    ▼
+INSERT to DB (file_url + metadata)
+    │
+    ▼
+Return { id, url } to client
+    │
+    ▼
+Client redirects to new track page
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📝",
+            label: "Upload Form Component",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — upload form (client component)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="str">'use client'</span>
+
+<span class="kw">import</span> { useState, useRef } <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> { useRouter } <span class="kw">from</span> <span class="str">'next/navigation'</span>
+
+<span class="kw">const</span> MAX_SIZE = <span class="num">100</span> * <span class="num">1024</span> * <span class="num">1024</span> <span class="cm">// 100MB</span>
+<span class="kw">const</span> ALLOWED = [<span class="str">'audio/mpeg'</span>, <span class="str">'audio/wav'</span>, <span class="str">'audio/flac'</span>]
+
+<span class="kw">export function</span> <span class="fn">UploadForm</span>() {
+  <span class="kw">const</span> [file, setFile] = <span class="fn">useState</span>&lt;File | null&gt;(<span class="kw">null</span>)
+  <span class="kw">const</span> [progress, setProgress] = <span class="fn">useState</span>(<span class="num">0</span>)
+  <span class="kw">const</span> [error, setError] = <span class="fn">useState</span>(<span class="str">''</span>)
+  <span class="kw">const</span> [uploading, setUploading] = <span class="fn">useState</span>(<span class="kw">false</span>)
+  <span class="kw">const</span> router = <span class="fn">useRouter</span>()
+
+  <span class="kw">const</span> <span class="fn">handleFile</span> = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) => {
+    <span class="kw">const</span> f = e.target.files?.[<span class="num">0</span>]
+    <span class="kw">if</span> (!f) <span class="kw">return</span>
+    <span class="kw">if</span> (!ALLOWED.<span class="fn">includes</span>(f.type)) {
+      <span class="fn">setError</span>(<span class="str">'Only MP3, WAV, FLAC accepted'</span>); <span class="kw">return</span>
+    }
+    <span class="kw">if</span> (f.size > MAX_SIZE) {
+      <span class="fn">setError</span>(<span class="str">'File must be under 100MB'</span>); <span class="kw">return</span>
+    }
+    <span class="fn">setError</span>(<span class="str">''</span>)
+    <span class="fn">setFile</span>(f)
+  }
+
+  <span class="kw">const</span> <span class="fn">handleUpload</span> = <span class="kw">async</span> () => {
+    <span class="kw">if</span> (!file) <span class="kw">return</span>
+    <span class="fn">setUploading</span>(<span class="kw">true</span>)
+
+    <span class="kw">const</span> fd = <span class="kw">new</span> FormData()
+    fd.<span class="fn">append</span>(<span class="str">'file'</span>, file)
+
+    <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/tracks/upload'</span>, {
+      method: <span class="str">'POST'</span>, body: fd
+    })
+
+    <span class="kw">if</span> (!res.ok) {
+      <span class="kw">const</span> { error } = <span class="kw">await</span> res.<span class="fn">json</span>()
+      <span class="fn">setError</span>(error)
+      <span class="fn">setUploading</span>(<span class="kw">false</span>)
+      <span class="kw">return</span>
+    }
+
+    <span class="kw">const</span> { id } = <span class="kw">await</span> res.<span class="fn">json</span>()
+    router.<span class="fn">push</span>(<span class="str">`/tracks/\${id}`</span>)
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"space-y-4"</span>&gt;
+      &lt;input type=<span class="str">"file"</span> accept=<span class="str">".mp3,.wav,.flac"</span> onChange={handleFile} /&gt;
+      {error &amp;&amp; &lt;p className=<span class="str">"text-destructive"</span>&gt;{error}&lt;/p&gt;}
+      {file &amp;&amp; &lt;p&gt;{file.name} — {(file.size/1e6).<span class="fn">toFixed</span>(<span class="num">1</span>)}MB&lt;/p&gt;}
+      &lt;button onClick={handleUpload} disabled={!file || uploading}&gt;
+        {uploading ? <span class="str">`Uploading... \${progress}%`</span> : <span class="str">'Upload Track'</span>}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 60-Minute Assignment</div>
+                <ul class="task-list" id="tasks-10">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the full UploadForm component with client-side validation</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the <code>/api/tracks/upload</code> route with server-side validation</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test uploading an actual audio file end-to-end — verify it appears in Supabase Storage</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test all error states: file too large, wrong type, unauthenticated</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Production Features",
+    phaseNum: 4,
+    color: "#ff6c6c",
+    lessons: [
+      {
+        id: 11,
+        title: "Admin Panel Architecture",
+        subtitle: "Build an internal tool that lets you manage your app without touching the database directly.",
+        time: "90 min",
+        sections: [
+          {
+            icon: "🛠️",
+            label: "Why Every App Needs an Admin Panel",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Once users start using your app, you need visibility and control. An admin panel lets you: moderate content, impersonate users for support, manage subscription tiers, view analytics, and trigger background jobs manually.</p>
+              <p>Build it early. The data you need for support tickets is already in your DB — you just need a secure UI to access it.</p>
+            `
+          },
+          {
+            icon: "🔒",
+            label: "Admin Auth Guard",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — app/admin/layout.tsx</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// Store admin emails in environment variable</span>
+<span class="cm">// ADMIN_EMAILS=you@email.com,cofounder@email.com</span>
+
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { redirect } <span class="kw">from</span> <span class="str">'next/navigation'</span>
+
+<span class="kw">export default async function</span> <span class="fn">AdminLayout</span>({
+  children
+}: { children: React.ReactNode }) {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+  <span class="kw">const</span> { data: { user } } = <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+
+  <span class="kw">const</span> adminEmails = process.env.<span class="var">ADMIN_EMAILS</span>
+    ?.<span class="fn">split</span>(<span class="str">','</span>) ?? []
+
+  <span class="kw">if</span> (!user || !adminEmails.<span class="fn">includes</span>(user.email!)) {
+    <span class="fn">redirect</span>(<span class="str">'/'</span>)
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"flex"</span>&gt;
+      &lt;AdminSidebar /&gt;
+      &lt;main className=<span class="str">"flex-1 p-8"</span>&gt;{children}&lt;/main&gt;
+    &lt;/div&gt;
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📊",
+            label: "Admin Dashboard — Key Metrics",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — app/admin/page.tsx</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+
+<span class="kw">export default async function</span> <span class="fn">AdminDashboard</span>() {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+
+  <span class="cm">// Parallel data fetching — faster than sequential</span>
+  <span class="kw">const</span> [
+    { count: totalUsers },
+    { count: totalTracks },
+    { data: recentUsers },
+    { data: flaggedTracks }
+  ] = <span class="kw">await</span> Promise.<span class="fn">all</span>([
+    supabase.from(<span class="str">'profiles'</span>).<span class="fn">select</span>(<span class="str">'*'</span>, { count: <span class="str">'exact'</span>, head: <span class="kw">true</span> }),
+    supabase.from(<span class="str">'tracks'</span>).<span class="fn">select</span>(<span class="str">'*'</span>, { count: <span class="str">'exact'</span>, head: <span class="kw">true</span> }),
+    supabase.from(<span class="str">'profiles'</span>)
+      .<span class="fn">select</span>(<span class="str">'id, username, created_at'</span>)
+      .<span class="fn">order</span>(<span class="str">'created_at'</span>, { ascending: <span class="kw">false</span> })
+      .<span class="fn">limit</span>(<span class="num">10</span>),
+    supabase.from(<span class="str">'tracks'</span>)
+      .<span class="fn">select</span>(<span class="str">'id, title, status'</span>)
+      .<span class="fn">eq</span>(<span class="str">'status'</span>, <span class="str">'flagged'</span>)
+  ])
+
+  <span class="kw">return</span> (
+    &lt;div&gt;
+      &lt;div className=<span class="str">"grid grid-cols-4 gap-4"</span>&gt;
+        &lt;MetricCard label=<span class="str">"Total Users"</span> value={totalUsers} /&gt;
+        &lt;MetricCard label=<span class="str">"Total Tracks"</span> value={totalTracks} /&gt;
+      &lt;/div&gt;
+      &lt;RecentUsersTable users={recentUsers ?? []} /&gt;
+    &lt;/div&gt;
+  )
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 90-Minute Assignment</div>
+                <ul class="task-list" id="tasks-11">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add <code>ADMIN_EMAILS</code> to your <code>.env.local</code> with your email address</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the admin layout with auth guard — test that non-admins get redirected</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the admin dashboard with total user count, total tracks, and a recent users table</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add a "Delete Track" action in the admin panel that hard-deletes from DB</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 12,
+        title: "Transactional Email with Resend",
+        subtitle: "Send beautiful, reliable emails: welcome, verification, notifications — using React components.",
+        time: "45 min",
+        sections: [
+          {
+            icon: "📧",
+            label: "Email Strategy",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Resend + React Email is the cleanest email stack for Next.js apps. You write emails as React components (with full TypeScript support), and send them via a simple API call.</p>
+              <p><strong>When to send emails:</strong></p>
+              <ul>
+                <li>User signs up → Welcome email</li>
+                <li>User uploads first track → "Your track is live!" email</li>
+                <li>Weekly digest → Top tracks summary</li>
+                <li>Admin flags content → Notification email to user</li>
+              </ul>
+            `
+          },
+          {
+            icon: "✉️",
+            label: "Welcome Email Template + Send",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — emails/WelcomeEmail.tsx</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import</span> {
+  Html, Head, Body, Container, Heading,
+  Text, Button, Hr, Preview
+} <span class="kw">from</span> <span class="str">'@react-email/components'</span>
+
+<span class="kw">interface</span> WelcomeEmailProps {
+  username: string
+  profileUrl: string
+}
+
+<span class="kw">export function</span> <span class="fn">WelcomeEmail</span>({ username, profileUrl }: WelcomeEmailProps) {
+  <span class="kw">return</span> (
+    &lt;Html&gt;
+      &lt;Head /&gt;
+      &lt;Preview&gt;Welcome to SyncMaster, {username}!&lt;/Preview&gt;
+      &lt;Body style={{ fontFamily: <span class="str">'sans-serif'</span>, background: <span class="str">'#f5f5f5'</span> }}&gt;
+        &lt;Container style={{ maxWidth: <span class="str">'600px'</span>, margin: <span class="str">'0 auto'</span> }}&gt;
+          &lt;Heading&gt;Welcome, {username} 🎵&lt;/Heading&gt;
+          &lt;Text&gt;
+            Your profile is ready. Start uploading your tracks
+            and sharing your music with the world.
+          &lt;/Text&gt;
+          &lt;Button href={profileUrl} style={{ background: <span class="str">'#6d6aff'</span>, color: <span class="str">'white'</span> }}&gt;
+            View My Profile
+          &lt;/Button&gt;
+          &lt;Hr /&gt;
+          &lt;Text style={{ color: <span class="str">'#666'</span>, fontSize: <span class="str">'12px'</span> }}&gt;
+            SyncMaster — Your music, your terms.
+          &lt;/Text&gt;
+        &lt;/Container&gt;
+      &lt;/Body&gt;
+    &lt;/Html&gt;
+  )
+}
+
+<span class="cm">// ——————————————————————————————————————————</span>
+<span class="cm">// lib/email.ts — Send function</span>
+<span class="cm">// ——————————————————————————————————————————</span>
+<span class="kw">import</span> { Resend } <span class="kw">from</span> <span class="str">'resend'</span>
+<span class="kw">import</span> { render } <span class="kw">from</span> <span class="str">'@react-email/render'</span>
+<span class="kw">import</span> { WelcomeEmail } <span class="kw">from</span> <span class="str">'@/emails/WelcomeEmail'</span>
+
+<span class="kw">const</span> resend = <span class="kw">new</span> <span class="fn">Resend</span>(process.env.<span class="var">RESEND_API_KEY</span>)
+
+<span class="kw">export async function</span> <span class="fn">sendWelcomeEmail</span>(
+  email: string,
+  username: string
+) {
+  <span class="kw">const</span> profileUrl = <span class="str">`\${process.env.NEXT_PUBLIC_APP_URL}/profile/\${username}`</span>
+
+  <span class="kw">await</span> resend.emails.<span class="fn">send</span>({
+    from:    <span class="str">'SyncMaster &lt;noreply@yourdomain.com&gt;'</span>,
+    to:      email,
+    subject: <span class="str">`Welcome to SyncMaster, \${username}!`</span>,
+    react:   <span class="fn">WelcomeEmail</span>({ username, profileUrl })
+  })
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 45-Minute Assignment</div>
+                <ul class="task-list" id="tasks-12">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Install: <code>npm install resend @react-email/components @react-email/render</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Get your Resend API key from resend.com. Add to <code>.env.local</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the WelcomeEmail template and <code>sendWelcomeEmail()</code> function</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Trigger the welcome email from the Supabase <code>handle_new_user</code> trigger by calling a webhook, or from a Server Action after profile creation</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Sign up a test account and verify the email arrives and looks correct</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 13,
+        title: "Background Jobs with Vercel Cron",
+        subtitle: "Scheduled tasks that run without a server: cleanup, digests, aggregations — all from API routes.",
+        time: "45 min",
+        sections: [
+          {
+            icon: "⏰",
+            label: "What Cron Jobs Are For",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Some work shouldn't happen in a user request. Cron jobs handle: sending weekly email digests, cleaning up deleted files from storage, aggregating analytics data, processing queued uploads, and expiring stale data.</p>
+              <p>Vercel Cron turns any API route into a scheduled job with a simple config file. No extra infrastructure.</p>
+            `
+          },
+          {
+            icon: "⚙️",
+            label: "Vercel Cron Setup",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">json — vercel.json (root of project)</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+{
+  <span class="str">"crons"</span>: [
+    {
+      <span class="str">"path"</span>: <span class="str">"/api/cron/cleanup"</span>,
+      <span class="str">"schedule"</span>: <span class="str">"0 2 * * *"</span>
+    },
+    {
+      <span class="str">"path"</span>: <span class="str">"/api/cron/weekly-digest"</span>,
+      <span class="str">"schedule"</span>: <span class="str">"0 10 * * 1"</span>
+    }
+  ]
+}
+<span class="cm">
+// Schedule format: minute hour day month weekday
+// "0 2 * * *"   = 2am every day
+// "0 10 * * 1"  = 10am every Monday
+// "*/15 * * * *" = every 15 minutes
+</span>
+                </pre></div>
+              </div>
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — app/api/cron/cleanup/route.ts</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>
+<span class="kw">import</span> { createClient } <span class="kw">from</span> <span class="str">'@supabase/supabase-js'</span>
+
+<span class="kw">export async function</span> <span class="fn">GET</span>(request: Request) {
+  <span class="cm">// Verify this is called by Vercel Cron, not a random user</span>
+  <span class="kw">const</span> authHeader = request.headers.<span class="fn">get</span>(<span class="str">'authorization'</span>)
+  <span class="kw">if</span> (authHeader !== <span class="str">`Bearer \${process.env.CRON_SECRET}`</span>) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> }, { status: <span class="num">401</span> })
+  }
+
+  <span class="cm">// Use service role to bypass RLS for admin operations</span>
+  <span class="kw">const</span> supabase = <span class="fn">createClient</span>(
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_URL</span>!,
+    process.env.<span class="var">SUPABASE_SERVICE_ROLE_KEY</span>!
+  )
+
+  <span class="cm">// Delete soft-deleted tracks older than 30 days</span>
+  <span class="kw">const</span> thirtyDaysAgo = <span class="kw">new</span> <span class="fn">Date</span>()
+  thirtyDaysAgo.<span class="fn">setDate</span>(thirtyDaysAgo.<span class="fn">getDate</span>() - <span class="num">30</span>)
+
+  <span class="kw">const</span> { data: deletedTracks } = <span class="kw">await</span> supabase
+    .from(<span class="str">'tracks'</span>)
+    .<span class="fn">select</span>(<span class="str">'id, file_url'</span>)
+    .<span class="fn">not</span>(<span class="str">'deleted_at'</span>, <span class="str">'is'</span>, <span class="kw">null</span>)
+    .<span class="fn">lt</span>(<span class="str">'deleted_at'</span>, thirtyDaysAgo.<span class="fn">toISOString</span>())
+
+  <span class="kw">if</span> (deletedTracks?.length) {
+    <span class="cm">// Delete files from storage</span>
+    <span class="kw">const</span> paths = deletedTracks.<span class="fn">map</span>(t => t.file_url)
+    <span class="kw">await</span> supabase.storage
+      .<span class="fn">from</span>(<span class="str">'audio-files'</span>)
+      .<span class="fn">remove</span>(paths)
+
+    <span class="cm">// Hard delete DB rows</span>
+    <span class="kw">const</span> ids = deletedTracks.<span class="fn">map</span>(t => t.id)
+    <span class="kw">await</span> supabase.from(<span class="str">'tracks'</span>).<span class="fn">delete</span>().<span class="fn">in</span>(<span class="str">'id'</span>, ids)
+  }
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>({
+    cleaned: deletedTracks?.length ?? <span class="num">0</span>,
+    timestamp: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>()
+  })
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 45-Minute Assignment</div>
+                <ul class="task-list" id="tasks-13">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add <code>CRON_SECRET</code> to your env (generate with <code>openssl rand -hex 32</code>)</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create <code>vercel.json</code> with at least one cron job definition</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the cleanup cron route with the authorization header check</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test locally by calling the route with the correct bearer token</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 14,
+        title: "Fintech: Payments + Compliance Layer",
+        subtitle: "Stripe integration, idempotent payment flows, and the compliance checklist every fintech app needs.",
+        time: "120 min",
+        sections: [
+          {
+            icon: "💳",
+            label: "Fintech Architecture Principles",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Fintech apps have different rules. A bug in a normal app loses a user's data. A bug in a payment flow loses their money and potentially violates regulations.</p>
+              <div class="callout warning">
+                <div class="callout-icon">⚠️</div>
+                <div class="callout-text"><strong>Never handle raw card data.</strong> Let Stripe handle it. Your server should only ever see Stripe tokens and payment intent IDs — never card numbers, CVVs, or account numbers.</div>
+              </div>
+              <h4>The Fintech Stack Add-ons</h4>
+              <table class="data-table">
+                <tr><th>Need</th><th>Tool</th><th>Why</th></tr>
+                <tr><td>Payments</td><td><span class="tag tag-accent">Stripe</span></td><td>PCI compliant, webhook events, idempotency keys built in</td></tr>
+                <tr><td>Idempotency</td><td>DB + UUID keys</td><td>Never charge a user twice for the same operation</td></tr>
+                <tr><td>Audit logs</td><td>DB table</td><td>Immutable log of every financial event — required for compliance</td></tr>
+                <tr><td>Rate limiting</td><td>Upstash Redis</td><td>Prevent brute force on payment endpoints</td></tr>
+              </table>
+            `
+          },
+          {
+            icon: "💰",
+            label: "Stripe Integration Pattern",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — stripe payment intent</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm">// app/api/payments/create-intent/route.ts</span>
+<span class="kw">import</span> Stripe <span class="kw">from</span> <span class="str">'stripe'</span>
+<span class="kw">import</span> { createServerClient } <span class="kw">from</span> <span class="str">'@/lib/supabase/server'</span>
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>
+
+<span class="kw">const</span> stripe = <span class="kw">new</span> <span class="fn">Stripe</span>(process.env.<span class="var">STRIPE_SECRET_KEY</span>!)
+
+<span class="kw">export async function</span> <span class="fn">POST</span>(request: Request) {
+  <span class="kw">const</span> supabase = <span class="kw">await</span> <span class="fn">createServerClient</span>()
+  <span class="kw">const</span> { data: { user } } = <span class="kw">await</span> supabase.auth.<span class="fn">getUser</span>()
+
+  <span class="kw">if</span> (!user) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> }, { status: <span class="num">401</span> })
+  }
+
+  <span class="kw">const</span> { amount, currency, idempotencyKey } = <span class="kw">await</span> request.<span class="fn">json</span>()
+
+  <span class="cm">// Idempotency key prevents double-charging</span>
+  <span class="cm">// Client generates this UUID before making the request</span>
+  <span class="kw">const</span> intent = <span class="kw">await</span> stripe.paymentIntents.<span class="fn">create</span>(
+    {
+      amount,       <span class="cm">// in cents</span>
+      currency,     <span class="cm">// 'usd', 'eur', etc.</span>
+      metadata: { userId: user.id }
+    },
+    { idempotencyKey }
+  )
+
+  <span class="cm">// Log every payment intent creation</span>
+  <span class="kw">await</span> supabase.from(<span class="str">'payment_events'</span>).<span class="fn">insert</span>({
+    user_id: user.id,
+    stripe_intent_id: intent.id,
+    amount,
+    currency,
+    status: intent.status,
+    event_type: <span class="str">'intent_created'</span>
+  })
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>({
+    clientSecret: intent.client_secret
+  })
+}
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🔔",
+            label: "Stripe Webhook Handler",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — app/api/webhooks/stripe/route.ts</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import</span> Stripe <span class="kw">from</span> <span class="str">'stripe'</span>
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>
+<span class="kw">import</span> { createClient } <span class="kw">from</span> <span class="str">'@supabase/supabase-js'</span>
+
+<span class="kw">const</span> stripe = <span class="kw">new</span> <span class="fn">Stripe</span>(process.env.<span class="var">STRIPE_SECRET_KEY</span>!)
+
+<span class="kw">export async function</span> <span class="fn">POST</span>(request: Request) {
+  <span class="kw">const</span> body = <span class="kw">await</span> request.<span class="fn">text</span>()
+  <span class="kw">const</span> sig = request.headers.<span class="fn">get</span>(<span class="str">'stripe-signature'</span>)!
+
+  <span class="cm">// Verify the webhook is genuinely from Stripe</span>
+  <span class="kw">let</span> event: Stripe.Event
+  <span class="kw">try</span> {
+    event = stripe.webhooks.<span class="fn">constructEvent</span>(
+      body, sig, process.env.<span class="var">STRIPE_WEBHOOK_SECRET</span>!
+    )
+  } <span class="kw">catch</span> {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: <span class="str">'Invalid signature'</span> }, { status: <span class="num">400</span> })
+  }
+
+  <span class="kw">const</span> supabase = <span class="fn">createClient</span>(
+    process.env.<span class="var">NEXT_PUBLIC_SUPABASE_URL</span>!,
+    process.env.<span class="var">SUPABASE_SERVICE_ROLE_KEY</span>!
+  )
+
+  <span class="kw">switch</span> (event.type) {
+    <span class="kw">case</span> <span class="str">'payment_intent.succeeded'</span>: {
+      <span class="kw">const</span> intent = event.data.object <span class="kw">as</span> Stripe.PaymentIntent
+      <span class="kw">await</span> supabase.from(<span class="str">'payment_events'</span>).<span class="fn">insert</span>({
+        stripe_intent_id: intent.id,
+        user_id: intent.metadata.userId,
+        status: <span class="str">'succeeded'</span>,
+        event_type: <span class="str">'payment_succeeded'</span>
+      })
+      <span class="cm">// Unlock premium features, send receipt email, etc.</span>
+      <span class="kw">break</span>
+    }
+    <span class="kw">case</span> <span class="str">'payment_intent.payment_failed'</span>: {
+      <span class="cm">// Log failure, notify user</span>
+      <span class="kw">break</span>
+    }
+  }
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ received: <span class="kw">true</span> })
+}
+                </pre></div>
+              </div>
+              <div class="callout warning">
+                <div class="callout-icon">⚠️</div>
+                <div class="callout-text">NEVER trust frontend payment confirmation. Always use webhooks to confirm payment success. The client can lie. Stripe webhooks cannot.</div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 120-Minute Assignment</div>
+                <ul class="task-list" id="tasks-14">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a Stripe account. Get test API keys. Add to <code>.env.local</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a <code>payment_events</code> table in Supabase (immutable audit log)</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the payment intent API route with idempotency key support</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Build the Stripe webhook handler. Test with Stripe CLI: <code>stripe listen --forward-to localhost:3000/api/webhooks/stripe</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Make a test payment using Stripe's test card 4242 4242 4242 4242. Verify the event appears in your DB</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      }
+    ]
+  },
+  {
+    phase: "Ship It",
+    phaseNum: 5,
+    color: "#a855f7",
+    lessons: [
+      {
+        id: 15,
+        title: "Environment Management",
+        subtitle: "Local → staging → production without breaking things. The environment discipline that separates amateurs from pros.",
+        time: "30 min",
+        sections: [
+          {
+            icon: "🌍",
+            label: "The Three Environments",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">environment strategy</span></div>
+                <div class="code-content"><pre>
+LOCAL (your machine)
+  .env.local           ← never committed
+  Supabase: local or dev project
+  Stripe: test keys
+  Resend: test mode (no real emails)
+  Vercel: not involved
+
+PREVIEW (Vercel branch deployments)
+  Env vars set in Vercel dashboard per branch
+  Supabase: dedicated staging project
+  Stripe: test keys
+  Real URL: feature-branch.vercel.app
+  Use for: QA, client demos, team review
+
+PRODUCTION (main branch → vercel.app)
+  Env vars set in Vercel dashboard (production)
+  Supabase: production project
+  Stripe: live keys
+  Resend: real sending domain configured
+  Custom domain: yourdomain.com
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📋",
+            label: "Vercel Env Setup",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">bash — vercel env commands</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="cm"># Pull current env vars from Vercel to local</span>
+vercel env pull .env.local
+
+<span class="cm"># Add an env var to production only</span>
+vercel env add STRIPE_SECRET_KEY production
+
+<span class="cm"># Add an env var to preview + development</span>
+vercel env add STRIPE_SECRET_KEY preview development
+
+<span class="cm"># List all env vars</span>
+vercel env ls
+
+<span class="cm">
+# .env.example — commit this to git (no real values)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+RESEND_API_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PUBLISHABLE_KEY=
+CRON_SECRET=
+ADMIN_EMAILS=
+NEXT_PUBLIC_APP_URL=
+</span>
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 30-Minute Assignment</div>
+                <ul class="task-list" id="tasks-15">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a <code>.env.example</code> file with all your key names (no values). Commit to git.</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Install Vercel CLI: <code>npm i -g vercel</code>. Run <code>vercel link</code> to connect your project.</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add all production env vars to Vercel dashboard (Settings → Environment Variables)</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Create a separate Supabase project for production. Update Vercel env vars to point to it.</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 16,
+        title: "Production Hardening + Security Audit",
+        subtitle: "The checklist that prevents your app from being hacked, DoS'd, or leaking user data.",
+        time: "60 min",
+        sections: [
+          {
+            icon: "🛡️",
+            label: "Security Threat Model",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <p>Before hardening, you need to know what you're hardening against. For a typical SaaS app, the top threats are:</p>
+              <table class="data-table">
+                <tr><th>Threat</th><th>Attack</th><th>Defense</th></tr>
+                <tr><td>Data exposure</td><td>Missing RLS allows data reads</td><td>RLS on every table, test with anon key</td></tr>
+                <tr><td>Auth bypass</td><td>Direct API calls without session</td><td>Always call getUser() in API routes</td></tr>
+                <tr><td>Injection</td><td>SQL injection in query params</td><td>Supabase parameterized queries (automatic)</td></tr>
+                <tr><td>File abuse</td><td>Upload malware, huge files</td><td>Type + size validation, server-side</td></tr>
+                <tr><td>Secret leak</td><td>API keys in git history</td><td>.env.local in .gitignore from day 1</td></tr>
+                <tr><td>DoS</td><td>Flood API endpoints</td><td>Rate limiting on auth + payment routes</td></tr>
+                <tr><td>CSRF</td><td>Forged form submissions</td><td>Server Actions handle this automatically</td></tr>
+              </table>
+            `
+          },
+          {
+            icon: "✅",
+            label: "Production Hardening Checklist",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">security checklist</span></div>
+                <div class="code-content"><pre>
+SUPABASE
+  ✓ RLS enabled on EVERY table
+  ✓ No table has "allow all" policy
+  ✓ Service role key ONLY in server-side code
+  ✓ Anon key is the only key exposed to browser
+  ✓ Storage buckets: correct public/private settings
+  ✓ No direct DB credentials anywhere in code
+
+NEXT.JS
+  ✓ All API routes check auth before any DB operation
+  ✓ User input validated with Zod before processing
+  ✓ No sensitive data in client-side state or localStorage
+  ✓ Error messages don't expose stack traces in production
+  ✓ Environment variables never logged to console
+
+HEADERS (add to next.config.ts)
+  ✓ X-Content-Type-Options: nosniff
+  ✓ X-Frame-Options: DENY
+  ✓ Content-Security-Policy configured
+  ✓ Referrer-Policy: strict-origin-when-cross-origin
+
+STRIPE (if applicable)
+  ✓ Webhook signature verification on every webhook
+  ✓ Never trust client-side payment confirmation
+  ✓ Idempotency keys on all payment operations
+  ✓ Test mode keys in dev, live keys in prod only
+
+GENERAL
+  ✓ .env.local in .gitignore (check git history!)
+  ✓ No hardcoded secrets anywhere in codebase
+  ✓ Dependencies audited: npm audit
+  ✓ Error tracking set up (Sentry recommended)
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🔒",
+            label: "Security Headers in Next.js",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <div class="code-block">
+                <div class="code-header">
+                  <span class="code-lang">typescript — next.config.ts</span>
+                  <button class="copy-btn" onclick="copyCode(this)">COPY</button>
+                </div>
+                <div class="code-content"><pre>
+<span class="kw">import type</span> { NextConfig } <span class="kw">from</span> <span class="str">'next'</span>
+
+<span class="kw">const</span> securityHeaders = [
+  { key: <span class="str">'X-DNS-Prefetch-Control'</span>, value: <span class="str">'on'</span> },
+  { key: <span class="str">'X-XSS-Protection'</span>, value: <span class="str">'1; mode=block'</span> },
+  { key: <span class="str">'X-Frame-Options'</span>, value: <span class="str">'SAMEORIGIN'</span> },
+  { key: <span class="str">'X-Content-Type-Options'</span>, value: <span class="str">'nosniff'</span> },
+  { key: <span class="str">'Referrer-Policy'</span>, value: <span class="str">'strict-origin-when-cross-origin'</span> },
+  {
+    key: <span class="str">'Permissions-Policy'</span>,
+    value: <span class="str">'camera=(), microphone=(), geolocation=()'</span>
+  },
+  {
+    key: <span class="str">'Content-Security-Policy'</span>,
+    value: [
+      <span class="str">"default-src 'self'"</span>,
+      <span class="str">"script-src 'self' 'unsafe-eval' 'unsafe-inline'"</span>,
+      <span class="str">"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"</span>,
+      <span class="str">"font-src 'self' https://fonts.gstatic.com"</span>,
+      <span class="str">"img-src 'self' data: blob: https:"</span>,
+      <span class="str">"connect-src 'self' https://*.supabase.co wss://*.supabase.co"</span>,
+    ].<span class="fn">join</span>(<span class="str">' ; '</span>)
+  }
+]
+
+<span class="kw">const</span> config: NextConfig = {
+  <span class="kw">async</span> <span class="fn">headers</span>() {
+    <span class="kw">return</span> [{ source: <span class="str">'/(.*)'</span>, headers: securityHeaders }]
+  }
+}
+
+<span class="kw">export default</span> config
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Assignment — Execute Now",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">⚡ 60-Minute Assignment</div>
+                <ul class="task-list" id="tasks-16">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Go through the security checklist above item by item. Fix every ✗</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Add security headers to <code>next.config.ts</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run <code>npm audit</code>. Fix any high or critical vulnerabilities</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test your RLS: use Supabase's anon key directly to query your tables. Verify restricted data is blocked.</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run <code>git log --all -- .env.local</code> to check if secrets were ever committed. Clean history if needed.</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      },
+      {
+        id: 17,
+        title: "Launch Checklist",
+        subtitle: "The final 50-point checklist before you push to production and share your app with the world.",
+        time: "60 min",
+        sections: [
+          {
+            icon: "🚀",
+            label: "Pre-Launch Checklist",
+            color: "rgba(124,108,255,0.15)",
+            content: `
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">launch checklist</span></div>
+                <div class="code-content"><pre>
+INFRASTRUCTURE
+  ✓ Custom domain connected to Vercel
+  ✓ SSL certificate active (Vercel handles this)
+  ✓ All production env vars set in Vercel
+  ✓ Production Supabase project (not dev)
+  ✓ Supabase production plan (no pause after 1 week)
+  ✓ Email sending domain verified in Resend
+  ✓ Stripe webhooks pointing to production URL
+
+FUNCTIONALITY
+  ✓ Sign up → email verification → onboarding flow tested
+  ✓ All main user flows tested end-to-end
+  ✓ Payment flow tested with Stripe test cards
+  ✓ File upload tested with real files
+  ✓ Email delivery confirmed
+  ✓ Admin panel accessible and working
+  ✓ Cron jobs configured in vercel.json
+
+PERFORMANCE
+  ✓ Run Lighthouse audit (aim for 90+ on all)
+  ✓ Images optimized and using next/image
+  ✓ Fonts loaded with next/font (no layout shift)
+  ✓ No console errors in production build
+  ✓ Run: next build → verify no TypeScript errors
+
+SEO & META
+  ✓ Title and description meta tags on all pages
+  ✓ Open Graph image for link previews
+  ✓ Favicon set
+  ✓ robots.txt in /public folder
+  ✓ sitemap.xml generated (next-sitemap package)
+
+LEGAL (especially fintech)
+  ✓ Privacy Policy page
+  ✓ Terms of Service page
+  ✓ Cookie consent (if applicable)
+  ✓ GDPR compliance (if EU users)
+
+MONITORING
+  ✓ Error tracking set up (Sentry)
+  ✓ Uptime monitoring (Better Uptime or Vercel)
+  ✓ Vercel Analytics enabled
+  ✓ Supabase database alerts configured
+
+BACKUP
+  ✓ Supabase daily backups enabled
+  ✓ Point-in-time recovery enabled (Pro plan)
+                </pre></div>
+              </div>
+            `
+          },
+          {
+            icon: "📣",
+            label: "Launch Strategy",
+            color: "rgba(108,255,184,0.12)",
+            content: `
+              <h4>The 3-Day Launch Plan</h4>
+              <p><strong>Day 1 — Soft launch:</strong> Share with 10 trusted users. Watch Sentry for errors. Watch Supabase logs for unexpected queries. Fix anything that breaks.</p>
+              <p><strong>Day 2 — Beta:</strong> Post in relevant communities (Discord servers, Reddit, Twitter/X). Frame as "looking for beta feedback." Respond to every message personally.</p>
+              <p><strong>Day 3 — Product Hunt / public:</strong> Only if day 1-2 had no critical bugs. Submit to Product Hunt, post on LinkedIn, write a brief build thread on X.</p>
+              <div class="callout tip">
+                <div class="callout-icon">💡</div>
+                <div class="callout-text">The first 48 hours after launch you should be watching your error tracker obsessively, not marketing. Fix bugs first. Marketing scales broken products into disasters.</div>
+              </div>
+            `
+          },
+          {
+            icon: "📊",
+            label: "Post-Launch: What to Measure",
+            color: "rgba(255,208,96,0.1)",
+            content: `
+              <table class="data-table">
+                <tr><th>Metric</th><th>Tool</th><th>Target (Week 1)</th></tr>
+                <tr><td>Signups</td><td>Supabase auth.users count</td><td>Any paying user</td></tr>
+                <tr><td>Activation rate</td><td>Users who completed core action / signups</td><td>&gt; 40%</td></tr>
+                <tr><td>Error rate</td><td>Sentry error rate</td><td>&lt; 0.5%</td></tr>
+                <tr><td>Page speed</td><td>Vercel Analytics LCP</td><td>&lt; 2.5s</td></tr>
+                <tr><td>Uptime</td><td>Uptime monitor</td><td>99.9%</td></tr>
+                <tr><td>Support tickets</td><td>Your inbox</td><td>Respond within 24h</td></tr>
+              </table>
+            `
+          },
+          {
+            icon: "🎬",
+            label: "Final Assignment — Ship It",
+            color: "rgba(108,255,184,0.08)",
+            content: `
+              <div class="assignment-box">
+                <div class="assignment-title">🚀 Launch Assignment</div>
+                <ul class="task-list" id="tasks-17">
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Complete every item on the pre-launch checklist</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Run <code>next build</code> locally — fix every TypeScript error and warning</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Set up Sentry error tracking: <code>npx @sentry/wizard@latest -i nextjs</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Deploy to production: <code>git push origin main</code> or <code>vercel --prod</code></div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Test the full user journey on your live production URL — not localhost</div>
+                  </li>
+                  <li class="task-item" onclick="toggleTask(this)">
+                    <div class="task-checkbox">✓</div>
+                    <div class="task-text">Share with 3 people. Get feedback. Come back and build the next feature.</div>
+                  </li>
+                </ul>
+              </div>
+            `
+          }
+        ]
+      }
+    ]
+  }
+]
+
+// ============================================================
+// STATE
+// ============================================================
+let currentLessonId = null
+let completedLessons = new Set(JSON.parse(localStorage.getItem('completed') || '[]'))
+let completedTasks = JSON.parse(localStorage.getItem('tasks') || '{}')
+
+function saveState() {
+  localStorage.setItem('completed', JSON.stringify([...completedLessons]))
+  localStorage.setItem('tasks', JSON.stringify(completedTasks))
+}
+
+// ============================================================
+// ALL LESSONS FLAT
+// ============================================================
+const allLessons = curriculum.flatMap(phase =>
+  phase.lessons.map(l => ({ ...l, phase: phase.phase, phaseColor: phase.color, phaseNum: phase.phaseNum }))
+)
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function buildSidebar() {
+  const nav = document.getElementById('nav-scroll')
+  nav.innerHTML = ''
+
+  curriculum.forEach(phase => {
+    const group = document.createElement('div')
+    group.className = 'phase-group'
+
+    const header = document.createElement('div')
+    header.className = 'phase-header'
+    header.innerHTML = `
+      <div class="phase-dot" style="background:${phase.color}"></div>
+      <span class="phase-label">Phase ${phase.phaseNum}: ${phase.phase}</span>
+    `
+    group.appendChild(header)
+
+    phase.lessons.forEach(lesson => {
+      const item = document.createElement('div')
+      item.className = `nav-item ${lesson.id === currentLessonId ? 'active' : ''} ${completedLessons.has(lesson.id) ? 'done' : ''}`
+      item.innerHTML = `
+        <span class="nav-num">${String(lesson.id).padStart(2, '0')}</span>
+        <span class="nav-title">${lesson.title}</span>
+        <div class="nav-done">✓</div>
+      `
+      item.onclick = () => showLesson(lesson.id)
+      group.appendChild(item)
+    })
+
+    nav.appendChild(group)
+  })
+
+  updateProgress()
+}
+
+function updateProgress() {
+  const total = allLessons.length
+  const done = completedLessons.size
+  const pct = Math.round((done / total) * 100)
+  document.getElementById('progress-fill').style.width = pct + '%'
+  document.getElementById('progress-pct').textContent = pct + '%'
+}
+
+// ============================================================
+// TOGGLE SIDEBAR
+// ============================================================
+let sidebarOpen = true
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen
+  const sb = document.getElementById('sidebar')
+  const btn = document.getElementById('toggle-btn')
+  if (sidebarOpen) {
+    sb.classList.remove('collapsed')
+    btn.textContent = '◀'
+  } else {
+    sb.classList.add('collapsed')
+    btn.textContent = '▶'
+  }
+}
+
+// ============================================================
+// HOME SCREEN
+// ============================================================
+function showHome() {
+  currentLessonId = null
+  buildSidebar()
+
+  const content = document.getElementById('content-area')
+  content.innerHTML = `
+    <div class="home-screen">
+      <div class="hero-section">
+        <div class="hero-eyebrow">Your Stack · Your App · Production</div>
+        <h1 class="hero-title">Vibe Coding<br><span>Production Apps</span></h1>
+        <p class="hero-sub">End-to-end curriculum for building SyncMaster and fintech apps with Next.js 14, Supabase, and Claude Code.</p>
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-num">17</div>
+            <div class="stat-label">Lessons</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">5</div>
+            <div class="stat-label">Phases</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">~20h</div>
+            <div class="stat-label">Total Time</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">${completedLessons.size}</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+        <button class="start-btn" onclick="showLesson(${completedLessons.size > 0 ? [...completedLessons].sort().pop() + 1 || 1 : 1})">
+          ${completedLessons.size > 0 ? '▶ Continue Learning' : '▶ Start Lesson 1'}
+        </button>
+      </div>
+
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:16px;letter-spacing:-0.3px">Course Phases</h2>
+      <div class="phase-cards">
+        ${curriculum.map(phase => `
+          <div class="phase-card" onclick="showLesson(${phase.lessons[0].id})">
+            <div class="phase-dot phase-card-dot" style="background:${phase.color}"></div>
+            <div class="phase-card-title">Phase ${phase.phaseNum}: ${phase.phase}</div>
+            <div class="phase-card-sub">${getPhaseDesc(phase.phaseNum)}</div>
+            <div class="phase-card-count">${phase.lessons.length} lessons · ${getPhaseDuration(phase)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `
+}
+
+function getPhaseDesc(n) {
+  return ['Mental models, spec engineering, and project architecture.',
+    'Next.js App Router, Supabase full setup, design system.',
+    'Auth, schema, file uploads, server actions.',
+    'Admin panel, email, cron jobs, payments + fintech.',
+    'Env management, security hardening, launch checklist.'][n - 1]
+}
+
+function getPhaseDuration(phase) {
+  const mins = phase.lessons.reduce((sum, l) => sum + parseInt(l.time), 0)
+  return mins >= 60 ? Math.floor(mins / 60) + 'h ' + (mins % 60 || '') + (mins % 60 ? 'min' : '') : mins + 'min'
+}
+
+// ============================================================
+// SHOW LESSON
+// ============================================================
+function showLesson(id) {
+  currentLessonId = id
+  const lesson = allLessons.find(l => l.id === id)
+  if (!lesson) return
+  buildSidebar()
+
+  const prevLesson = allLessons.find(l => l.id === id - 1)
+  const nextLesson = allLessons.find(l => l.id === id + 1)
+
+  const content = document.getElementById('content-area')
+  content.innerHTML = `
+    <div class="lesson-meta">
+      <span class="phase-badge">Phase ${lesson.phaseNum}: ${lesson.phase}</span>
+      <span class="lesson-num-badge">Lesson ${lesson.id} of ${allLessons.length}</span>
+      <span class="lesson-time">⏱ ${lesson.time}</span>
+    </div>
+    <h1 class="lesson-title">${lesson.title}</h1>
+    <p class="lesson-subtitle">${lesson.subtitle}</p>
+
+    ${lesson.sections.map((s, i) => `
+      <div class="section ${i === 0 ? 'open' : ''}" id="section-${id}-${i}">
+        <div class="section-header" onclick="toggleSection('section-${id}-${i}')">
+          <div class="section-icon" style="background:${s.color}">${s.icon}</div>
+          <span class="section-label">${s.label}</span>
+          <span class="section-chevron">▼</span>
+        </div>
+        <div class="section-body">${s.content}</div>
+      </div>
+    `).join('')}
+
+    <div class="lesson-nav">
+      <button class="nav-btn" onclick="${prevLesson ? `showLesson(${prevLesson.id})` : 'showHome()'}" >
+        ← ${prevLesson ? 'Previous' : 'Home'}
+      </button>
+      <button class="mark-done-btn ${completedLessons.has(id) ? 'done' : ''}" id="done-btn-${id}" onclick="markDone(${id})">
+        ${completedLessons.has(id) ? '✓ Completed' : 'Mark Complete'}
+      </button>
+      <button class="nav-btn primary" onclick="${nextLesson ? `showLesson(${nextLesson.id})` : 'showHome()'}" >
+        ${nextLesson ? 'Next →' : 'Finish 🎉'}
+      </button>
+    </div>
+  `
+
+  // Restore task states
+  const taskKey = `lesson-${id}`
+  if (completedTasks[taskKey]) {
+    completedTasks[taskKey].forEach(idx => {
+      const taskItems = document.querySelectorAll('.task-item')
+      if (taskItems[idx]) taskItems[idx].classList.add('checked')
+    })
+  }
+
+  content.scrollTop = 0
+  document.getElementById('main').scrollTop = 0
+}
+
+// ============================================================
+// TOGGLE SECTION
+// ============================================================
+function toggleSection(id) {
+  const section = document.getElementById(id)
+  section.classList.toggle('open')
+}
+
+// ============================================================
+// MARK DONE
+// ============================================================
+function markDone(id) {
+  if (completedLessons.has(id)) {
+    completedLessons.delete(id)
+  } else {
+    completedLessons.add(id)
+  }
+  saveState()
+  buildSidebar()
+  const btn = document.getElementById(`done-btn-${id}`)
+  if (btn) {
+    btn.classList.toggle('done', completedLessons.has(id))
+    btn.textContent = completedLessons.has(id) ? '✓ Completed' : 'Mark Complete'
+  }
+}
+
+// ============================================================
+// TOGGLE TASK
+// ============================================================
+function toggleTask(el) {
+  el.classList.toggle('checked')
+  const checkbox = el.querySelector('.task-checkbox')
+  checkbox.textContent = el.classList.contains('checked') ? '✓' : ''
+}
+
+// ============================================================
+// COPY CODE
+// ============================================================
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre')
+  const text = pre.innerText || pre.textContent
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'COPIED!'
+    btn.classList.add('copied')
+    setTimeout(() => {
+      btn.textContent = 'COPY'
+      btn.classList.remove('copied')
+    }, 2000)
+  })
+}
+
+// ============================================================
+// KEYBOARD NAV
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' && currentLessonId) {
+    const next = allLessons.find(l => l.id === currentLessonId + 1)
+    if (next) showLesson(next.id)
+  }
+  if (e.key === 'ArrowLeft' && currentLessonId) {
+    const prev = allLessons.find(l => l.id === currentLessonId - 1)
+    if (prev) showLesson(prev.id)
+    else showHome()
+  }
+  if (e.key === 'Escape') showHome()
+})
+
+// ============================================================
+// LOGO CLICK
+// ============================================================
+document.querySelector('.logo').addEventListener('click', showHome)
+
+// ============================================================
+// INIT
+// ============================================================
+showHome()
+</script>
+</body>
+</html>
