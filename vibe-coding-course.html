@@ -911,18 +911,77 @@
     color: var(--muted);
   }
 
+  /* HAMBURGER (hidden on desktop) */
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 201;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .hamburger:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MOBILE SIDEBAR BACKDROP */
+  .mobile-sb-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+    background: rgba(0,0,0,0.55);
+  }
+  .mobile-sb-backdrop.open { display: block; }
+
   /* RESPONSIVE */
   @media (max-width: 768px) {
-    .sidebar { width: 60px; min-width: 60px; }
-    .sidebar .logo-text,
-    .sidebar .progress-bar-wrap,
-    .sidebar .nav-title,
-    .sidebar .phase-label { display: none; opacity: 0; }
-    .sidebar .nav-item { justify-content: center; }
-    .content-area { padding: 24px 20px 60px; }
-    .hero-title { font-size: 32px; }
-    .stats-row { gap: 20px; }
-    .phase-cards { grid-template-columns: 1fr 1fr; }
+    .hamburger { display: flex; }
+
+    /* Sidebar becomes a fixed full-height overlay */
+    .sidebar {
+      position: fixed !important;
+      top: 0; left: 0; bottom: 0;
+      width: 280px !important;
+      min-width: 280px !important;
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.mobile-open { transform: translateX(0); }
+
+    /* Always show full sidebar content when it's an overlay */
+    .sidebar .logo-text { display: block !important; opacity: 1 !important; width: auto !important; }
+    .sidebar .progress-bar-wrap { display: block !important; opacity: 1 !important; }
+    .sidebar .nav-title { display: block !important; opacity: 1 !important; width: auto !important; }
+    .sidebar .phase-label { display: block !important; }
+    .sidebar .nav-item { justify-content: flex-start !important; padding: 9px 20px !important; }
+
+    /* Hide the desktop collapse toggle on mobile */
+    .toggle-btn { display: none !important; }
+
+    /* Main fills full width since sidebar is out of flow */
+    .main { width: 100%; }
+
+    .content-area { padding: 68px 20px 80px; }
+    .hero-section { padding: 20px 0 32px; }
+    .hero-title { font-size: 30px; }
+    .hero-sub { font-size: 14px; }
+    .stats-row { gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .phase-cards { grid-template-columns: 1fr; }
+
+    /* Notes drawer full-width on mobile */
+    .notes-drawer { width: 100%; }
+    .notes-fab { bottom: 20px; right: 16px; }
   }
 </style>
 </head>
@@ -957,6 +1016,10 @@
     <div class="content-area" id="content-area"></div>
   </div>
 </div>
+
+<!-- MOBILE HAMBURGER + SIDEBAR BACKDROP -->
+<button class="hamburger" id="hamburger" onclick="toggleMobileSidebar()">☰</button>
+<div class="mobile-sb-backdrop" id="mobile-sb-backdrop" onclick="closeMobileSidebar()"></div>
 
 <!-- NOTES FAB -->
 <button class="notes-fab" id="notes-fab" onclick="openNotes()">📝 Notes</button>
@@ -3640,10 +3703,11 @@ function updateProgress() {
 }
 
 // ============================================================
-// TOGGLE SIDEBAR
+// TOGGLE SIDEBAR (desktop collapse)
 // ============================================================
 let sidebarOpen = true
 function toggleSidebar() {
+  if (window.innerWidth <= 768) return
   sidebarOpen = !sidebarOpen
   const sb = document.getElementById('sidebar')
   const btn = document.getElementById('toggle-btn')
@@ -3657,11 +3721,33 @@ function toggleSidebar() {
 }
 
 // ============================================================
+// MOBILE SIDEBAR
+// ============================================================
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar')
+  const isOpen = sb.classList.contains('mobile-open')
+  isOpen ? closeMobileSidebar() : openMobileSidebar()
+}
+
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open')
+  document.getElementById('mobile-sb-backdrop').classList.add('open')
+  document.getElementById('hamburger').textContent = '×'
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open')
+  document.getElementById('mobile-sb-backdrop').classList.remove('open')
+  document.getElementById('hamburger').textContent = '☰'
+}
+
+// ============================================================
 // HOME SCREEN
 // ============================================================
 function showHome() {
   currentLessonId = null
   closeNotes()
+  closeMobileSidebar()
   document.getElementById('notes-fab').classList.remove('visible')
   buildSidebar()
 
@@ -3730,6 +3816,7 @@ function showLesson(id) {
   currentLessonId = id
   const lesson = allLessons.find(l => l.id === id)
   if (!lesson) return
+  closeMobileSidebar()
   buildSidebar()
 
   const prevLesson = allLessons.find(l => l.id === id - 1)
