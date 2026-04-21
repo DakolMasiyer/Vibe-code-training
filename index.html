@@ -2036,7 +2036,7 @@ Practical split:
     )
   }
 
-  <span class="kw">const</span> fileName = <span class="str">`\${user.id}/\${Date.now()}-\${file.name}`</span>
+  <span class="kw">const</span> fileName = <span class="str">\`\${user.id}/\${Date.now()}-\${file.name}\`</span>
 
   <span class="cm">// Upload to Supabase Storage</span>
   <span class="kw">const</span> { data, error } = <span class="kw">await</span> supabase.storage
@@ -2339,7 +2339,7 @@ Key files:
     <span class="fn">setLoading</span>(<span class="kw">true</span>); <span class="fn">setError</span>(<span class="kw">null</span>)
     <span class="kw">const</span> { error } = <span class="kw">await</span> supabase.auth.<span class="fn">signInWithOtp</span>({
       email,
-      options: { emailRedirectTo: <span class="str">`\${location.origin}/auth/callback`</span> }
+      options: { emailRedirectTo: <span class="str">\`\${location.origin}/auth/callback\`</span> }
     })
     <span class="kw">if</span> (error) <span class="fn">setError</span>(error.message)
     <span class="kw">else</span> <span class="fn">setSent</span>(<span class="kw">true</span>)
@@ -2730,7 +2730,7 @@ Client redirects to new track page
     }
 
     <span class="kw">const</span> { id } = <span class="kw">await</span> res.<span class="fn">json</span>()
-    router.<span class="fn">push</span>(<span class="str">`/tracks/\${id}`</span>)
+    router.<span class="fn">push</span>(<span class="str">\`/tracks/\${id}\`</span>)
   }
 
   <span class="kw">return</span> (
@@ -2739,7 +2739,7 @@ Client redirects to new track page
       {error &amp;&amp; &lt;p className=<span class="str">"text-destructive"</span>&gt;{error}&lt;/p&gt;}
       {file &amp;&amp; &lt;p&gt;{file.name} — {(file.size/1e6).<span class="fn">toFixed</span>(<span class="num">1</span>)}MB&lt;/p&gt;}
       &lt;button onClick={handleUpload} disabled={!file || uploading}&gt;
-        {uploading ? <span class="str">`Uploading... \${progress}%`</span> : <span class="str">'Upload Track'</span>}
+        {uploading ? <span class="str">\`Uploading... \${progress}%\`</span> : <span class="str">'Upload Track'</span>}
       &lt;/button&gt;
     &lt;/div&gt;
   )
@@ -2999,12 +2999,12 @@ Client redirects to new track page
   email: string,
   username: string
 ) {
-  <span class="kw">const</span> profileUrl = <span class="str">`\${process.env.NEXT_PUBLIC_APP_URL}/profile/\${username}`</span>
+  <span class="kw">const</span> profileUrl = <span class="str">\`\${process.env.NEXT_PUBLIC_APP_URL}/profile/\${username}\`</span>
 
   <span class="kw">await</span> resend.emails.<span class="fn">send</span>({
     from:    <span class="str">'SyncMaster &lt;noreply@yourdomain.com&gt;'</span>,
     to:      email,
-    subject: <span class="str">`Welcome to SyncMaster, \${username}!`</span>,
+    subject: <span class="str">\`Welcome to SyncMaster, \${username}!\`</span>,
     react:   <span class="fn">WelcomeEmail</span>({ username, profileUrl })
   })
 }
@@ -3104,7 +3104,7 @@ Client redirects to new track page
 <span class="kw">export async function</span> <span class="fn">GET</span>(request: Request) {
   <span class="cm">// Verify this is called by Vercel Cron, not a random user</span>
   <span class="kw">const</span> authHeader = request.headers.<span class="fn">get</span>(<span class="str">'authorization'</span>)
-  <span class="kw">if</span> (authHeader !== <span class="str">`Bearer \${process.env.CRON_SECRET}`</span>) {
+  <span class="kw">if</span> (authHeader !== <span class="str">\`Bearer \${process.env.CRON_SECRET}\`</span>) {
     <span class="kw">return</span> NextResponse.<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> }, { status: <span class="num">401</span> })
   }
 
